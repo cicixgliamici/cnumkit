@@ -9,6 +9,8 @@ add_library(cnumkit
     src/vector.c
     src/matrix.c
     src/linalg.c
+    src/optim.c
+    src/ml.c
 )
 
 target_include_directories(cnumkit PUBLIC include)
@@ -22,5 +24,11 @@ target_compile_options(cnumkit PRIVATE
 add_executable(test_basic tests/test_basic.c)
 target_link_libraries(test_basic PRIVATE cnumkit m)
 
+add_executable(test_ml tests/test_ml.c)
+target_link_libraries(test_ml PRIVATE cnumkit m)
+
 add_executable(solve_linear_system examples/solve_linear_system.c)
 target_link_libraries(solve_linear_system PRIVATE cnumkit m)
+
+add_executable(linear_regression_demo examples/linear_regression_demo.c)
+target_link_libraries(linear_regression_demo PRIVATE cnumkit m)
