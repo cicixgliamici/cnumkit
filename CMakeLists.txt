@@ -24,6 +24,9 @@ target_compile_options(cnumkit PRIVATE
 add_executable(test_basic tests/test_basic.c)
 target_link_libraries(test_basic PRIVATE cnumkit m)
 
+add_executable(test_optim tests/test_optim.c)
+target_link_libraries(test_optim PRIVATE cnumkit m)
+
 add_executable(test_ml tests/test_ml.c)
 target_link_libraries(test_ml PRIVATE cnumkit m)
 
