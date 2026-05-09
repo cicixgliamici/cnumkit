@@ -1,15 +1,7 @@
-#include "cnumkit/ml.h"
-#include "cnumkit/vector.h"
+#include "cnumkit.h"
 
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-
-#define TEST_EPSILON 0.15
-
-static int almost_equal(double a, double b) {
-    return fabs(a - b) < TEST_EPSILON;
-}
+#define CNK_TEST_EPSILON 0.15
+#include "test_framework.h"
 
 static void test_linear_regression_fit(void) {
     /*
@@ -21,8 +13,8 @@ static void test_linear_regression_fit(void) {
     cnk_vector *x = cnk_vector_create(5);
     cnk_vector *y = cnk_vector_create(5);
 
-    assert(x != NULL);
-    assert(y != NULL);
+    EXPECT_NOT_NULL(x);
+    EXPECT_NOT_NULL(y);
 
     cnk_vector_set(x, 0, 0.0);
     cnk_vector_set(x, 1, 1.0);
@@ -46,23 +38,19 @@ static void test_linear_regression_fit(void) {
         &model
     );
 
-    assert(status == 0);
+    EXPECT_TRUE(status == 0);
 
-    assert(almost_equal(model.weight, 2.0));
-    assert(almost_equal(model.bias, 1.0));
+    EXPECT_ALMOST_EQ(model.weight, 2.0);
+    EXPECT_ALMOST_EQ(model.bias, 1.0);
 
     double mse = 0.0;
-    assert(cnk_ml_mean_squared_error(x, y, &model, &mse) == 0);
-    assert(mse < 0.05);
+    EXPECT_TRUE(cnk_ml_mean_squared_error(x, y, &model, &mse) == 0);
+    EXPECT_TRUE(mse < 0.05);
 
     cnk_vector_free(x);
     cnk_vector_free(y);
 }
 
-int main(void) {
-    test_linear_regression_fit();
-
-    printf("All ML tests passed.\n");
-
-    return 0;
-}
+TEST_SUITE("Machine Learning")
+    RUN_TEST(test_linear_regression_fit);
+TEST_SUITE_END()

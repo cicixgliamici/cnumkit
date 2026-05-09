@@ -1,52 +1,91 @@
 #ifndef CNUMKIT_MATRIX_H
 #define CNUMKIT_MATRIX_H
 
-#include <stddef.h>
+/**
+ * @file matrix.h
+ * @brief Matrix operations and memory management.
+ */
 
+#include <stddef.h>
+#include "cnumkit_export.h"
+
+/**
+ * @brief Represents a dense 2D matrix stored in row-major order.
+ */
 typedef struct {
-    size_t rows;
-    size_t cols;
-    double *data;
+    size_t rows;  /**< Number of rows in the matrix */
+    size_t cols;  /**< Number of columns in the matrix */
+    double *data; /**< Flat array containing matrix elements (row-major) */
 } cnk_matrix;
 
-/*
- * Creates a rows x cols matrix.
- * Data is stored in row-major order.
- * The memory is initialized to zero.
+/**
+ * @brief Creates a new matrix with the specified dimensions.
+ * 
+ * The memory is allocated dynamically and all elements are initialized to zero.
+ * 
+ * @param rows Number of rows.
+ * @param cols Number of columns.
+ * @return A pointer to the newly created matrix, or NULL if memory allocation fails.
  */
-cnk_matrix *cnk_matrix_create(size_t rows, size_t cols);
+CNUMKIT_EXPORT cnk_matrix *cnk_matrix_create(size_t rows, size_t cols);
 
-/*
- * Frees a matrix created with cnk_matrix_create.
+/**
+ * @brief Frees the memory associated with a matrix.
+ * 
+ * @param m Pointer to the matrix to free. If m is NULL, the function does nothing.
  */
-void cnk_matrix_free(cnk_matrix *m);
+CNUMKIT_EXPORT void cnk_matrix_free(cnk_matrix *m);
 
-/*
- * Gets the value at position row, col.
- * Returns 0.0 if matrix is NULL or indices are invalid.
+/**
+ * @brief Retrieves the value at a specific row and column in the matrix.
+ * 
+ * @param m Pointer to the matrix.
+ * @param row The 0-based row index.
+ * @param col The 0-based column index.
+ * @return The value at (row, col), or 0.0 if out of bounds or m is NULL.
  */
-double cnk_matrix_get(const cnk_matrix *m, size_t row, size_t col);
+CNUMKIT_EXPORT double cnk_matrix_get(const cnk_matrix *m, size_t row, size_t col);
 
-/*
- * Sets the value at position row, col.
- * Returns 0 on success, -1 on error.
+/**
+ * @brief Sets the value at a specific row and column in the matrix.
+ * 
+ * @param m Pointer to the matrix.
+ * @param row The 0-based row index.
+ * @param col The 0-based column index.
+ * @param value The value to set.
+ * @return 0 on success, or -1 if out of bounds or m is NULL.
  */
-int cnk_matrix_set(cnk_matrix *m, size_t row, size_t col, double value);
+CNUMKIT_EXPORT int cnk_matrix_set(cnk_matrix *m, size_t row, size_t col, double value);
 
-/*
- * Creates an identity matrix of size n x n.
+/**
+ * @brief Creates an identity matrix of size n x n.
+ * 
+ * All diagonal elements are set to 1.0, and all other elements are 0.0.
+ * 
+ * @param n Size of the square identity matrix.
+ * @return A pointer to the identity matrix, or NULL on allocation failure.
  */
-cnk_matrix *cnk_matrix_identity(size_t n);
+CNUMKIT_EXPORT cnk_matrix *cnk_matrix_identity(size_t n);
 
-/*
- * Matrix multiplication: result = a * b.
- * Returns a newly allocated matrix, or NULL on error.
+/**
+ * @brief Multiplies two matrices: result = a * b.
+ * 
+ * The number of columns in 'a' must equal the number of rows in 'b'.
+ * If dimensions mismatch, an error is set and NULL is returned.
+ * 
+ * @param a The left matrix.
+ * @param b The right matrix.
+ * @return A newly allocated matrix containing the result, or NULL on error.
  */
-cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_matrix *b);
+CNUMKIT_EXPORT cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_matrix *b);
 
-/*
- * Prints a matrix to stdout.
+/**
+ * @brief Prints the matrix to the standard output.
+ * 
+ * Each row is printed on a new line enclosed in brackets.
+ * 
+ * @param m Pointer to the matrix.
  */
-void cnk_matrix_print(const cnk_matrix *m);
+CNUMKIT_EXPORT void cnk_matrix_print(const cnk_matrix *m);
 
-#endif
+#endif /* CNUMKIT_MATRIX_H */

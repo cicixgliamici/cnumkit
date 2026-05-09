@@ -1,5 +1,4 @@
-#include "cnumkit/ml.h"
-#include "cnumkit/vector.h"
+#include "cnumkit.h"
 
 #include <stdio.h>
 

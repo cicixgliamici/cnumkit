@@ -1,4 +1,4 @@
-#include "cnumkit/vector.h"
+#include "cnumkit.h"
 
 #include <math.h>
 #include <stdio.h>

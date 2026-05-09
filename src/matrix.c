@@ -1,4 +1,4 @@
-#include "cnumkit/matrix.h"
+#include "cnumkit.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,17 +9,20 @@ static size_t cnk_matrix_index(const cnk_matrix *m, size_t row, size_t col) {
 
 cnk_matrix *cnk_matrix_create(size_t rows, size_t cols) {
     if (rows == 0 || cols == 0) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Matrix dimensions must be greater than zero");
         return NULL;
     }
 
     cnk_matrix *m = malloc(sizeof(cnk_matrix));
     if (!m) {
+        cnk_set_last_error(CNK_ERROR_ALLOCATION, "Failed to allocate matrix structure");
         return NULL;
     }
 
     m->data = calloc(rows * cols, sizeof(double));
     if (!m->data) {
         free(m);
+        cnk_set_last_error(CNK_ERROR_ALLOCATION, "Failed to allocate matrix data");
         return NULL;
     }
 
@@ -70,15 +73,18 @@ cnk_matrix *cnk_matrix_identity(size_t n) {
 
 cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_matrix *b) {
     if (!a || !b || !a->data || !b->data) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_matrix_multiply");
         return NULL;
     }
 
     if (a->cols != b->rows) {
+        cnk_set_last_error(CNK_ERROR_DIMENSION_MISMATCH, "Matrix dimensions are incompatible for multiplication");
         return NULL;
     }
 
     cnk_matrix *result = cnk_matrix_create(a->rows, b->cols);
     if (!result) {
+        // Error already set by cnk_matrix_create
         return NULL;
     }
 

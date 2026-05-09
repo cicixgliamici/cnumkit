@@ -1,20 +1,13 @@
-#include "cnumkit/optim.h"
+#include "cnumkit.h"
 
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-
-#define TEST_EPSILON 1e-3
+#define CNK_TEST_EPSILON 1e-3
+#include "test_framework.h"
 
 static double quadratic(double x) {
     /*
      * Minimum at x = 3.
      */
     return (x - 3.0) * (x - 3.0);
-}
-
-static int almost_equal(double a, double b) {
-    return fabs(a - b) < TEST_EPSILON;
 }
 
 static void test_numerical_derivative(void) {
@@ -35,8 +28,8 @@ static void test_numerical_derivative(void) {
         &derivative
     );
 
-    assert(status == 0);
-    assert(almost_equal(derivative, 4.0));
+    EXPECT_TRUE(status == 0);
+    EXPECT_ALMOST_EQ(derivative, 4.0);
 }
 
 static void test_gradient_descent(void) {
@@ -50,15 +43,11 @@ static void test_gradient_descent(void) {
         &result
     );
 
-    assert(status == 0);
-    assert(almost_equal(result, 3.0));
+    EXPECT_TRUE(status == 0);
+    EXPECT_ALMOST_EQ(result, 3.0);
 }
 
-int main(void) {
-    test_numerical_derivative();
-    test_gradient_descent();
-
-    printf("All optimization tests passed.\n");
-
-    return 0;
-}
+TEST_SUITE("Optimization and Solvers")
+    RUN_TEST(test_numerical_derivative);
+    RUN_TEST(test_gradient_descent);
+TEST_SUITE_END()

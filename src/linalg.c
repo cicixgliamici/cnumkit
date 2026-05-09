@@ -1,4 +1,4 @@
-#include "cnumkit/linalg.h"
+#include "cnumkit.h"
 
 #include <math.h>
 #include <stdlib.h>

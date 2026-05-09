@@ -1,6 +1,4 @@
-#include "cnumkit/linalg.h"
-#include "cnumkit/matrix.h"
-#include "cnumkit/vector.h"
+#include "cnumkit.h"
 
 #include <stdio.h>
 

@@ -1,4 +1,4 @@
-#include "cnumkit/optim.h"
+#include "cnumkit.h"
 
 #include <math.h>
 #include <stddef.h>
