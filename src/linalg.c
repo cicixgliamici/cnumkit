@@ -3,6 +3,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "cnumkit/contracts.h"
+
 #define CNK_EPSILON 1e-12
 
 static void swap_rows(double *data, size_t cols, size_t row_a, size_t row_b) {
@@ -18,6 +20,10 @@ static void swap_rows(double *data, size_t cols, size_t row_a, size_t row_b) {
 }
 
 cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) {
+    CNK_REQUIRES(A != NULL && b != NULL);
+    CNK_REQUIRES(A->rows == A->cols);
+    CNK_REQUIRES(A->rows == b->size);
+
     if (!A || !b || !A->data || !b->data) {
         return NULL;
     }

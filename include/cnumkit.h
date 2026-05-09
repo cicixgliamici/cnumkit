@@ -28,6 +28,7 @@ extern "C" {
 #include "cnumkit/optim.h"
 #include "cnumkit/ml.h"
 #include "cnumkit/error.h"
+#include "cnumkit/contracts.h"
 
 #ifdef __cplusplus
 }

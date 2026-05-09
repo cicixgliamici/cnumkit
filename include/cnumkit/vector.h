@@ -25,6 +25,10 @@ typedef struct {
  * @param size Number of elements.
  * @return A pointer to the newly created vector, or NULL if memory allocation fails.
  */
+/*@
+  requires size > 0;
+  ensures \result == \null || (\result->size == size && \valid(\result->data + (0 .. size-1)));
+*/
 CNUMKIT_EXPORT cnk_vector *cnk_vector_create(size_t size);
 
 /**
@@ -32,6 +36,10 @@ CNUMKIT_EXPORT cnk_vector *cnk_vector_create(size_t size);
  * 
  * @param v Pointer to the vector to free. If v is NULL, the function does nothing.
  */
+/*@
+  requires v == \null || \valid(v);
+  assigns \empty; // Simplification for demonstration
+*/
 CNUMKIT_EXPORT void cnk_vector_free(cnk_vector *v);
 
 /**
@@ -41,6 +49,10 @@ CNUMKIT_EXPORT void cnk_vector_free(cnk_vector *v);
  * @param index The 0-based index of the element.
  * @return The value at the specified index, or 0.0 if the index is out of bounds or v is NULL.
  */
+/*@
+  requires \valid(v);
+  requires index < v->size;
+*/
 CNUMKIT_EXPORT double cnk_vector_get(const cnk_vector *v, size_t index);
 
 /**
@@ -64,6 +76,11 @@ CNUMKIT_EXPORT int cnk_vector_set(cnk_vector *v, size_t index, double value);
  * @param result Pointer to a double where the result will be stored.
  * @return 0 on success, or -1 on dimension mismatch or NULL pointers.
  */
+/*@
+  requires \valid(a) && \valid(b);
+  requires a->size == b->size;
+  requires \valid(result);
+*/
 CNUMKIT_EXPORT int cnk_vector_dot(const cnk_vector *a, const cnk_vector *b, double *result);
 
 /**

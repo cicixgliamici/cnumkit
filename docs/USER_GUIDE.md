@@ -4,12 +4,27 @@ Welcome to the **cnumkit** (C Num Kit) documentation. This guide will walk you t
 
 ## Architecture & Design Philosophy
 
-`cnumkit` is designed to be a lightweight, zero-dependency C library for numerical analysis and machine learning. 
-Its architecture follows these core principles:
+`cnumkit` is designed to be a lightweight, zero-dependency C library for numerical analysis and machine learning. Its architecture is built around professional-grade paradigms specifically designed for robust scientific computing.
 
-1. **Opaque Data Structures**: Core structures like `cnk_vector` and `cnk_matrix` are simple, flat, and use contiguous memory (row-major for matrices) to be cache-friendly.
-2. **Error Handling**: Instead of crashing on bad inputs or silently failing, the library uses a robust, thread-local error system. You can always check `cnk_get_last_error()` after a function returns `NULL` or `-1`.
-3. **Cross-Platform Compatibility**: Using CMake and automatic export headers (`cnumkit_export.h`), the library compiles flawlessly as a shared library (`.dll`, `.so`) or static library (`.a`, `.lib`) across Windows, Linux, and macOS.
+### 1. Opaque and Contiguous Data Structures
+Core structures like `cnk_vector` and `cnk_matrix` are simple, flat, and use contiguous memory (row-major for matrices). This guarantees high cache locality and makes the structures easily translatable into hardware-accelerated SIMD instructions (like RISC-V RVV or x86 AVX) in the future.
+
+### 2. The Two-Tiered Safety Architecture
+A fundamental problem in C libraries is how to handle invalid inputs (e.g., multiplying matrices of incompatible dimensions). `cnumkit` solves this using a two-tiered approach:
+
+#### Tier 1: Formal Verification & Design By Contract (Fail-Fast)
+To prevent bugs during development, the library employs **Design By Contract (DbC)**.
+- **Theory**: Every function has a strict mathematical "contract" (Preconditions it expects, Postconditions it guarantees). We define these formally using **ACSL (ANSI/ISO C Specification Language)** in the Doxygen comments (e.g., `/*@ requires a->cols == b->rows; */`).
+- **Implementation**: At runtime, these contracts are enforced via the `CNK_REQUIRES` and `CNK_ENSURES` macros. If a developer breaks a mathematical rule, the program crashes immediately (Fail-Fast) pointing to the exact broken contract.
+- **Zero-Overhead**: Because these checks are implemented as macros, they compile away completely in `Release` mode (`NDEBUG`), guaranteeing absolute maximum performance for scientific computation.
+
+#### Tier 2: Thread-Local Error Handling (Fail-Soft)
+For runtime errors in production (e.g., running out of memory, or loading user-provided invalid datasets), crashing is unacceptable.
+- **Theory**: The library uses a "Fail-Soft" approach. Functions return `NULL` or `-1` on failure, but they do not fail silently.
+- **Implementation**: Before returning, the function records exactly what went wrong using a `THREAD_LOCAL` variable. This makes the library perfectly thread-safe. You can query `cnk_get_last_error()` and `cnk_get_last_error_message()` at any time to understand why a mathematical operation failed without polluting function signatures with double pointers.
+
+### 3. Cross-Platform Compatibility
+Using CMake and automatic export headers (`cnumkit_export.h`), the library compiles flawlessly as a shared library (`.dll`, `.so`) or static library (`.a`, `.lib`) across Windows, Linux, and macOS. The export macros handle the complex symbol visibility rules automatically.
 
 ## Modules Overview
 
@@ -50,6 +65,7 @@ int main() {
     cnk_linear_regression_model model;
     int status = cnk_ml_linear_regression_fit(x, y, 0.01, 1000, &model);
     
+    // Demonstrate Tier 2: Fail-Soft Error Handling
     if (status != 0) {
         printf("Error: %s\n", cnk_get_last_error_message());
         return 1;

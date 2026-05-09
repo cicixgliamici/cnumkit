@@ -22,6 +22,11 @@
  * @return A newly allocated vector x containing the solution, or NULL if the 
  *         matrix is singular or dimensions mismatch.
  */
+/*@
+  requires \valid(A) && \valid(b);
+  requires A->rows == A->cols;
+  requires A->rows == b->size;
+*/
 CNUMKIT_EXPORT cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b);
 
 #endif /* CNUMKIT_LINALG_H */

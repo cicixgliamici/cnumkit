@@ -3,11 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cnumkit/contracts.h"
+
 static size_t cnk_matrix_index(const cnk_matrix *m, size_t row, size_t col) {
     return row * m->cols + col;
 }
 
 cnk_matrix *cnk_matrix_create(size_t rows, size_t cols) {
+    CNK_REQUIRES(rows > 0 && cols > 0);
+
     if (rows == 0 || cols == 0) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Matrix dimensions must be greater than zero");
         return NULL;
@@ -29,6 +33,9 @@ cnk_matrix *cnk_matrix_create(size_t rows, size_t cols) {
     m->rows = rows;
     m->cols = cols;
 
+    CNK_ENSURES(m != NULL);
+    CNK_ENSURES(m->rows == rows && m->cols == cols);
+
     return m;
 }
 
@@ -42,6 +49,9 @@ void cnk_matrix_free(cnk_matrix *m) {
 }
 
 double cnk_matrix_get(const cnk_matrix *m, size_t row, size_t col) {
+    CNK_REQUIRES(m != NULL);
+    CNK_REQUIRES(row < m->rows && col < m->cols);
+
     if (!m || !m->data || row >= m->rows || col >= m->cols) {
         return 0.0;
     }
@@ -50,6 +60,9 @@ double cnk_matrix_get(const cnk_matrix *m, size_t row, size_t col) {
 }
 
 int cnk_matrix_set(cnk_matrix *m, size_t row, size_t col, double value) {
+    CNK_REQUIRES(m != NULL);
+    CNK_REQUIRES(row < m->rows && col < m->cols);
+
     if (!m || !m->data || row >= m->rows || col >= m->cols) {
         return -1;
     }
@@ -59,6 +72,8 @@ int cnk_matrix_set(cnk_matrix *m, size_t row, size_t col, double value) {
 }
 
 cnk_matrix *cnk_matrix_identity(size_t n) {
+    CNK_REQUIRES(n > 0);
+
     cnk_matrix *m = cnk_matrix_create(n, n);
     if (!m) {
         return NULL;
@@ -72,6 +87,9 @@ cnk_matrix *cnk_matrix_identity(size_t n) {
 }
 
 cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_matrix *b) {
+    CNK_REQUIRES(a != NULL && b != NULL);
+    CNK_REQUIRES(a->cols == b->rows);
+
     if (!a || !b || !a->data || !b->data) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_matrix_multiply");
         return NULL;
