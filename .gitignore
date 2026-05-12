@@ -21,3 +21,4 @@ compile_commands.json
 
 # User specifically requested roadmap to be ignored
 ROADMAP.md
+LOCAL_CHANGELOG.md

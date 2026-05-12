@@ -1,5 +1,7 @@
 #include "cnumkit.h"
 
+#include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -7,6 +9,23 @@
 
 static size_t cnk_matrix_index(const cnk_matrix *m, size_t row, size_t col) {
     return row * m->cols + col;
+}
+
+static int cnk_checked_matrix_count(size_t rows, size_t cols, size_t *count) {
+    if (!count || rows == 0 || cols == 0) {
+        return -1;
+    }
+
+    if (rows > SIZE_MAX / cols) {
+        return -1;
+    }
+
+    *count = rows * cols;
+    if (*count > SIZE_MAX / sizeof(double)) {
+        return -1;
+    }
+
+    return 0;
 }
 
 cnk_matrix *cnk_matrix_create(size_t rows, size_t cols) {
@@ -17,13 +36,19 @@ cnk_matrix *cnk_matrix_create(size_t rows, size_t cols) {
         return NULL;
     }
 
+    size_t element_count = 0;
+    if (cnk_checked_matrix_count(rows, cols, &element_count) != 0) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Matrix dimensions overflow size_t");
+        return NULL;
+    }
+
     cnk_matrix *m = malloc(sizeof(cnk_matrix));
     if (!m) {
         cnk_set_last_error(CNK_ERROR_ALLOCATION, "Failed to allocate matrix structure");
         return NULL;
     }
 
-    m->data = calloc(rows * cols, sizeof(double));
+    m->data = calloc(element_count, sizeof(double));
     if (!m->data) {
         free(m);
         cnk_set_last_error(CNK_ERROR_ALLOCATION, "Failed to allocate matrix data");
@@ -53,6 +78,7 @@ double cnk_matrix_get(const cnk_matrix *m, size_t row, size_t col) {
     CNK_REQUIRES(row < m->rows && col < m->cols);
 
     if (!m || !m->data || row >= m->rows || col >= m->cols) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Invalid matrix access");
         return 0.0;
     }
 
@@ -64,6 +90,12 @@ int cnk_matrix_set(cnk_matrix *m, size_t row, size_t col, double value) {
     CNK_REQUIRES(row < m->rows && col < m->cols);
 
     if (!m || !m->data || row >= m->rows || col >= m->cols) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Invalid matrix write");
+        return -1;
+    }
+
+    if (!isfinite(value)) {
+        cnk_set_last_error(CNK_ERROR_MATH, "Matrix value must be finite");
         return -1;
     }
 
@@ -100,6 +132,12 @@ cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_matrix *b) {
         return NULL;
     }
 
+    size_t element_count = 0;
+    if (cnk_checked_matrix_count(a->rows, b->cols, &element_count) != 0) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Result matrix dimensions overflow size_t");
+        return NULL;
+    }
+
     cnk_matrix *result = cnk_matrix_create(a->rows, b->cols);
     if (!result) {
         // Error already set by cnk_matrix_create
@@ -118,6 +156,7 @@ cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_matrix *b) {
         }
     }
 
+    cnk_set_last_error(CNK_SUCCESS, NULL);
     return result;
 }
 

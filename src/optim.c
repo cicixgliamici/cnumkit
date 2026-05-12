@@ -12,10 +12,12 @@ int cnk_optim_numerical_derivative(
     double *result
 ) {
     if (!f || !result) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_optim_numerical_derivative");
         return -1;
     }
 
-    if (fabs(h) < CNK_OPTIM_EPSILON) {
+    if (!isfinite(x) || !isfinite(h) || fabs(h) < CNK_OPTIM_EPSILON) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Derivative point and step must be finite, and step must be nonzero");
         return -1;
     }
 
@@ -23,7 +25,12 @@ int cnk_optim_numerical_derivative(
     double fx_minus = f(x - h);
 
     *result = (fx_plus - fx_minus) / (2.0 * h);
+    if (!isfinite(*result)) {
+        cnk_set_last_error(CNK_ERROR_MATH, "Numerical derivative produced a non-finite result");
+        return -1;
+    }
 
+    cnk_set_last_error(CNK_SUCCESS, NULL);
     return 0;
 }
 
@@ -35,10 +42,12 @@ int cnk_optim_gradient_descent_1d(
     double *result
 ) {
     if (!f || !result) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_optim_gradient_descent_1d");
         return -1;
     }
 
-    if (learning_rate <= 0.0 || iterations <= 0) {
+    if (!isfinite(initial_x) || !isfinite(learning_rate) || learning_rate <= 0.0 || iterations <= 0) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Gradient descent parameters are invalid");
         return -1;
     }
 
@@ -52,9 +61,14 @@ int cnk_optim_gradient_descent_1d(
         }
 
         x = x - learning_rate * gradient;
+        if (!isfinite(x)) {
+            cnk_set_last_error(CNK_ERROR_MATH, "Gradient descent diverged to a non-finite value");
+            return -1;
+        }
     }
 
     *result = x;
 
+    cnk_set_last_error(CNK_SUCCESS, NULL);
     return 0;
 }

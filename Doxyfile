@@ -2,7 +2,16 @@ PROJECT_NAME           = "cnumkit"
 PROJECT_NUMBER         = 0.1.0
 PROJECT_BRIEF          = "A lightweight C library for numerical analysis and machine learning."
 OUTPUT_DIRECTORY       = docs
-INPUT                  = include/cnumkit/
+USE_MDFILE_AS_MAINPAGE = README.md
+INPUT                  = README.md \
+                         docs/USER_GUIDE.md \
+                         docs/LIBRARY_ARCHITECTURE.md \
+                         docs/PROJECT_STATUS.md \
+                         docs/REVIEWER_ROADMAP.md \
+                         docs/RISCV.md \
+                         include/cnumkit.h \
+                         include/cnumkit/ \
+                         include/cnumkit_export.h
 OPTIMIZE_OUTPUT_FOR_C  = YES
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO

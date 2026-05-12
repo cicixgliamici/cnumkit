@@ -12,11 +12,10 @@
  */
 
 /*
- * By default, we enable runtime contract checking in debug builds,
- * or if CNUMKIT_ENABLE_CONTRACTS is explicitly defined.
- * In production/release, they are compiled away for zero overhead.
+ * Runtime contract checking is opt-in through CNUMKIT_ENABLE_CONTRACTS.
+ * Public API functions still validate runtime inputs and return error codes.
  */
-#if defined(CNUMKIT_ENABLE_CONTRACTS) || !defined(NDEBUG)
+#if defined(CNUMKIT_ENABLE_CONTRACTS)
 
     /* We use assert, but we could hook this into our error handling system! */
     #define CNK_REQUIRES(condition) assert((condition) && "Precondition failed: " #condition)

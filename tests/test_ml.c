@@ -51,6 +51,32 @@ static void test_linear_regression_fit(void) {
     cnk_vector_free(y);
 }
 
+static void test_linear_regression_invalid_arguments(void) {
+    cnk_vector *x = cnk_vector_create(2);
+    cnk_vector *y = cnk_vector_create(3);
+    cnk_linear_regression_model model;
+    double mse = 0.0;
+
+    EXPECT_NOT_NULL(x);
+    EXPECT_NOT_NULL(y);
+
+    EXPECT_TRUE(cnk_ml_linear_regression_fit(NULL, y, 0.01, 10, &model) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    EXPECT_TRUE(cnk_ml_linear_regression_fit(x, y, 0.01, 10, &model) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_DIMENSION_MISMATCH);
+
+    EXPECT_TRUE(cnk_ml_linear_regression_fit(x, x, 0.0, 10, &model) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    EXPECT_TRUE(cnk_ml_mean_squared_error(x, y, &model, &mse) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_DIMENSION_MISMATCH);
+
+    cnk_vector_free(x);
+    cnk_vector_free(y);
+}
+
 TEST_SUITE("Machine Learning")
     RUN_TEST(test_linear_regression_fit);
+    RUN_TEST(test_linear_regression_invalid_arguments);
 TEST_SUITE_END()

@@ -17,7 +17,7 @@ typedef double (*cnk_scalar_function)(double x);
  * @brief Computes the numerical derivative of a scalar function f at a given point x.
  * 
  * Uses the central difference method:
- * derivative ≈ (f(x + h) - f(x - h)) / (2 * h)
+ * derivative ~= (f(x + h) - f(x - h)) / (2 * h)
  * 
  * @param f The scalar function to differentiate.
  * @param x The point at which to evaluate the derivative.

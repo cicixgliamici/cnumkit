@@ -1,6 +1,7 @@
 #include "cnumkit.h"
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "cnumkit/contracts.h"
@@ -25,22 +26,34 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
     CNK_REQUIRES(A->rows == b->size);
 
     if (!A || !b || !A->data || !b->data) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_linalg_solve_gaussian");
         return NULL;
     }
 
     if (A->rows != A->cols || A->rows != b->size) {
+        cnk_set_last_error(CNK_ERROR_DIMENSION_MISMATCH, "Linear system dimensions are incompatible");
         return NULL;
     }
 
     size_t n = A->rows;
+    if (n == 0 || n == SIZE_MAX) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Linear system size is invalid");
+        return NULL;
+    }
 
     /*
      * We create an augmented matrix [A | b].
      * Dimensions: n x (n + 1)
      */
     size_t aug_cols = n + 1;
+    if (n > SIZE_MAX / aug_cols) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Augmented matrix dimensions overflow size_t");
+        return NULL;
+    }
+
     double *aug = calloc(n * aug_cols, sizeof(double));
     if (!aug) {
+        cnk_set_last_error(CNK_ERROR_ALLOCATION, "Failed to allocate augmented matrix");
         return NULL;
     }
 
@@ -70,6 +83,7 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
 
         if (max_abs < CNK_EPSILON) {
             free(aug);
+            cnk_set_last_error(CNK_ERROR_SINGULAR_MATRIX, "Matrix is singular or nearly singular");
             return NULL;
         }
 
@@ -105,6 +119,7 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
         if (fabs(diagonal) < CNK_EPSILON) {
             cnk_vector_free(x);
             free(aug);
+            cnk_set_last_error(CNK_ERROR_SINGULAR_MATRIX, "Matrix is singular or nearly singular");
             return NULL;
         }
 
@@ -112,5 +127,6 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
     }
 
     free(aug);
+    cnk_set_last_error(CNK_SUCCESS, NULL);
     return x;
 }

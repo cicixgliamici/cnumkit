@@ -3,8 +3,7 @@
 
 /* Cross-platform thread-local storage macro */
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_THREADS__)
-#include <threads.h>
-#define THREAD_LOCAL thread_local
+#define THREAD_LOCAL _Thread_local
 #elif defined(_MSC_VER)
 #define THREAD_LOCAL __declspec(thread)
 #elif defined(__GNUC__)

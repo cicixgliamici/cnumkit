@@ -4,11 +4,16 @@ project(cnumkit VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
 include(GNUInstallDirs)
 
 # Allow user to choose between static and shared
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(CNUMKIT_ENABLE_CONTRACTS "Enable runtime contract checks" OFF)
+option(CNUMKIT_ENABLE_SANITIZERS "Enable address/undefined behavior sanitizers when supported" OFF)
+
+include(CTest)
 
 add_library(cnumkit
     src/vector.c
@@ -38,7 +43,7 @@ include(GenerateExportHeader)
 generate_export_header(cnumkit
     EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/include/cnumkit_export.h
 )
-target_include_directories(cnumkit PUBLIC
+target_include_directories(cnumkit BEFORE PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
 )
 
@@ -48,22 +53,36 @@ target_compile_options(cnumkit PRIVATE
     -Wpedantic
 )
 
-# We link the math library
-target_link_libraries(cnumkit PUBLIC m)
+if(CNUMKIT_ENABLE_CONTRACTS)
+    target_compile_definitions(cnumkit PUBLIC CNUMKIT_ENABLE_CONTRACTS)
+endif()
+
+if(CNUMKIT_ENABLE_SANITIZERS AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+    target_compile_options(cnumkit PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+    target_link_options(cnumkit PRIVATE -fsanitize=address,undefined)
+endif()
+
+# Link the C math library where it exists as a separate library.
+if(NOT MSVC)
+    target_link_libraries(cnumkit PUBLIC m)
+endif()
 
 # -----------------
 # Tests and Examples
 # -----------------
 option(CNUMKIT_BUILD_TESTS "Build tests" ON)
-if(CNUMKIT_BUILD_TESTS)
+if(CNUMKIT_BUILD_TESTS AND BUILD_TESTING)
     add_executable(test_basic tests/test_basic.c)
     target_link_libraries(test_basic PRIVATE cnumkit)
+    add_test(NAME test_basic COMMAND test_basic)
 
     add_executable(test_optim tests/test_optim.c)
     target_link_libraries(test_optim PRIVATE cnumkit)
+    add_test(NAME test_optim COMMAND test_optim)
 
     add_executable(test_ml tests/test_ml.c)
     target_link_libraries(test_ml PRIVATE cnumkit)
+    add_test(NAME test_ml COMMAND test_ml)
 endif()
 
 option(CNUMKIT_BUILD_EXAMPLES "Build examples" ON)

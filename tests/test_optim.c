@@ -47,7 +47,21 @@ static void test_gradient_descent(void) {
     EXPECT_ALMOST_EQ(result, 3.0);
 }
 
+static void test_optim_invalid_arguments(void) {
+    double result = 0.0;
+
+    EXPECT_TRUE(cnk_optim_numerical_derivative(NULL, 1.0, 1e-6, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    EXPECT_TRUE(cnk_optim_numerical_derivative(quadratic, 1.0, 0.0, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    EXPECT_TRUE(cnk_optim_gradient_descent_1d(quadratic, 1.0, -0.1, 10, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+}
+
 TEST_SUITE("Optimization and Solvers")
     RUN_TEST(test_numerical_derivative);
     RUN_TEST(test_gradient_descent);
+    RUN_TEST(test_optim_invalid_arguments);
 TEST_SUITE_END()

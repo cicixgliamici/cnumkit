@@ -1,5 +1,6 @@
 #include "cnumkit.h"
 
+#include <math.h>
 #include <stddef.h>
 
 double cnk_ml_linear_regression_predict(
@@ -7,6 +8,7 @@ double cnk_ml_linear_regression_predict(
     double x
 ) {
     if (!model) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null model passed to cnk_ml_linear_regression_predict");
         return 0.0;
     }
 
@@ -21,14 +23,17 @@ int cnk_ml_linear_regression_fit(
     cnk_linear_regression_model *model
 ) {
     if (!x || !y || !model || !x->data || !y->data) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_ml_linear_regression_fit");
         return -1;
     }
 
     if (x->size == 0 || x->size != y->size) {
+        cnk_set_last_error(CNK_ERROR_DIMENSION_MISMATCH, "Training vectors must be nonempty and have matching sizes");
         return -1;
     }
 
-    if (learning_rate <= 0.0 || epochs <= 0) {
+    if (!isfinite(learning_rate) || learning_rate <= 0.0 || epochs <= 0) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Linear regression training parameters are invalid");
         return -1;
     }
 
@@ -56,11 +61,17 @@ int cnk_ml_linear_regression_fit(
 
         weight = weight - learning_rate * d_weight;
         bias = bias - learning_rate * d_bias;
+
+        if (!isfinite(weight) || !isfinite(bias)) {
+            cnk_set_last_error(CNK_ERROR_MATH, "Linear regression diverged to non-finite parameters");
+            return -1;
+        }
     }
 
     model->weight = weight;
     model->bias = bias;
 
+    cnk_set_last_error(CNK_SUCCESS, NULL);
     return 0;
 }
 
@@ -71,10 +82,12 @@ int cnk_ml_mean_squared_error(
     double *result
 ) {
     if (!x || !y || !model || !result || !x->data || !y->data) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_ml_mean_squared_error");
         return -1;
     }
 
     if (x->size == 0 || x->size != y->size) {
+        cnk_set_last_error(CNK_ERROR_DIMENSION_MISMATCH, "Evaluation vectors must be nonempty and have matching sizes");
         return -1;
     }
 
@@ -91,6 +104,11 @@ int cnk_ml_mean_squared_error(
     }
 
     *result = sum / (double)x->size;
+    if (!isfinite(*result)) {
+        cnk_set_last_error(CNK_ERROR_MATH, "Mean squared error produced a non-finite result");
+        return -1;
+    }
 
+    cnk_set_last_error(CNK_SUCCESS, NULL);
     return 0;
 }

@@ -1,53 +1,87 @@
 # cnumkit
 
-`cnumkit` (C Num Kit) is a lightweight C library for numerical analysis, linear algebra, optimization, and basic machine learning algorithms. It is designed to be simple, clean, and easy to integrate into other C/C++ projects.
+`cnumkit` is a small C11 library for scientific computing. The current focus is a reviewer-ready scalar core: predictable APIs, explicit error handling, strong tests, and a clean path toward architecture-specific acceleration such as RISC-V Vector Extension support.
 
-## Features
+## Current Modules
 
-- **Vectors and Matrices**: Dynamic allocation, basic algebraic operations, norms, dot products.
-- **Linear Algebra**: System solvers (Gaussian elimination).
-- **Optimization**: Gradient descent and basic function minimizers.
-- **Machine Learning**: Linear regression and other fundamental ML utilities.
+- Vectors and dense row-major matrices.
+- Basic linear algebra, including Gaussian elimination with partial pivoting.
+- Scalar numerical optimization helpers.
+- Simple 1D machine-learning utilities.
 
-## Build Instructions
+## Safety Model
 
-The project uses CMake as its build system. To build the library and tests/examples:
+Public functions validate runtime inputs and report failures through return values plus thread-local error state:
+
+- Pointer or parameter errors return `NULL` or `-1` and set `CNK_ERROR_INVALID_ARGUMENT`.
+- Dimension mismatches set `CNK_ERROR_DIMENSION_MISMATCH`.
+- Singular systems set `CNK_ERROR_SINGULAR_MATRIX`.
+- Allocation failures set `CNK_ERROR_ALLOCATION`.
+- Non-finite numerical results set `CNK_ERROR_MATH`.
+
+Runtime contract checks are available as an opt-in development aid with `CNUMKIT_ENABLE_CONTRACTS=ON`. They are not required for normal API safety checks.
+
+## Build And Test
 
 ```bash
-mkdir build
-cd build
-cmake ..
-make
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+ctest --test-dir build --output-on-failure
 ```
 
-## Usage Example
+Useful reviewer configurations:
 
-Include the main header file to use the library:
+```bash
+cmake -S . -B build-contracts -DCNUMKIT_ENABLE_CONTRACTS=ON
+cmake -S . -B build-sanitize -DCNUMKIT_ENABLE_SANITIZERS=ON
+cmake -S . -B build-static -DBUILD_SHARED_LIBS=OFF
+```
+
+## Minimal Example
 
 ```c
 #include <stdio.h>
 #include "cnumkit.h"
 
-int main() {
-    cnk_vector *v1 = cnk_vector_create(3);
-    cnk_vector *v2 = cnk_vector_create(3);
-    
-    cnk_vector_set(v1, 0, 1.0);
-    cnk_vector_set(v2, 0, 2.0);
-    
-    double dot_prod;
-    cnk_vector_dot(v1, v2, &dot_prod);
-    printf("Dot product: %f\n", dot_prod);
-    
-    cnk_vector_free(v1);
-    cnk_vector_free(v2);
+int main(void) {
+    cnk_vector *a = cnk_vector_create(3);
+    cnk_vector *b = cnk_vector_create(3);
+    double result = 0.0;
+
+    if (!a || !b) {
+        fprintf(stderr, "%s\n", cnk_get_last_error_message());
+        cnk_vector_free(a);
+        cnk_vector_free(b);
+        return 1;
+    }
+
+    cnk_vector_set(a, 0, 1.0);
+    cnk_vector_set(a, 1, 2.0);
+    cnk_vector_set(a, 2, 3.0);
+    cnk_vector_set(b, 0, 4.0);
+    cnk_vector_set(b, 1, 5.0);
+    cnk_vector_set(b, 2, 6.0);
+
+    if (cnk_vector_dot(a, b, &result) != 0) {
+        fprintf(stderr, "%s\n", cnk_get_last_error_message());
+    } else {
+        printf("dot = %.6f\n", result);
+    }
+
+    cnk_vector_free(a);
+    cnk_vector_free(b);
     return 0;
 }
 ```
 
-## Project Structure
+## RISC-V Direction
 
-- `include/`: Public headers. You can include `cnumkit.h` for all functionalities.
-- `src/`: Implementation of the library.
-- `examples/`: Code examples demonstrating how to use the modules.
-- `tests/`: Unit tests to ensure reliability.
+RISC-V support starts with cross-compilation and smoke tests against the scalar implementation. RVV acceleration should be added later as an optional backend with the scalar C implementation kept as the reference fallback.
+
+## Documentation
+
+- `docs/USER_GUIDE.md` explains normal usage and safety behavior.
+- `docs/LIBRARY_ARCHITECTURE.md` explains how the library is organized internally.
+- `docs/PROJECT_STATUS.md` summarizes the current implementation state.
+- `docs/REVIEWER_ROADMAP.md` tracks the remaining reviewer-readiness work.
+- `docs/RISCV.md` explains the first RISC-V cross-build path.
