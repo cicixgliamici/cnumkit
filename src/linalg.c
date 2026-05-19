@@ -69,6 +69,7 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
      * Forward elimination with partial pivoting.
      */
     for (size_t k = 0; k < n; k++) {
+        /* Find the row with the maximum absolute value for partial pivoting */
         size_t pivot_row = k;
         double max_abs = fabs(aug[k * aug_cols + k]);
 
@@ -108,6 +109,7 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
     }
 
     for (size_t i = n; i-- > 0;) {
+        /* Start with the right-hand side value for this row */
         double sum = aug[i * aug_cols + n];
 
         for (size_t j = i + 1; j < n; j++) {

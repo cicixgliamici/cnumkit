@@ -21,6 +21,7 @@ int cnk_optim_numerical_derivative(
         return -1;
     }
 
+    /* Compute central difference approximation */
     double fx_plus = f(x + h);
     double fx_minus = f(x - h);
 
@@ -60,6 +61,7 @@ int cnk_optim_gradient_descent_1d(
             return -1;
         }
 
+        /* Update the point using the gradient descent rule */
         x = x - learning_rate * gradient;
         if (!isfinite(x)) {
             cnk_set_last_error(CNK_ERROR_MATH, "Gradient descent diverged to a non-finite value");

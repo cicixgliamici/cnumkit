@@ -76,7 +76,31 @@ static void test_linear_regression_invalid_arguments(void) {
     cnk_vector_free(y);
 }
 
+static void test_ml_nan_inf(void) {
+    cnk_vector *x = cnk_vector_create(1);
+    cnk_vector *y = cnk_vector_create(1);
+    cnk_linear_regression_model model;
+
+    EXPECT_NOT_NULL(x);
+    EXPECT_NOT_NULL(y);
+
+    cnk_vector_set(x, 0, 1.0);
+    cnk_vector_set(y, 0, 2.0);
+
+    /* Train with NAN learning rate */
+    EXPECT_TRUE(cnk_ml_linear_regression_fit(x, y, NAN, 10, &model) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    /* Train with INFINITY learning rate */
+    EXPECT_TRUE(cnk_ml_linear_regression_fit(x, y, INFINITY, 10, &model) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    cnk_vector_free(x);
+    cnk_vector_free(y);
+}
+
 TEST_SUITE("Machine Learning")
     RUN_TEST(test_linear_regression_fit);
     RUN_TEST(test_linear_regression_invalid_arguments);
+    RUN_TEST(test_ml_nan_inf);
 TEST_SUITE_END()

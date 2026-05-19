@@ -41,6 +41,7 @@ int cnk_ml_linear_regression_fit(
     double bias = 0.0;
     double n = (double)x->size;
 
+    /* Run gradient descent for the specified number of epochs */
     for (int epoch = 0; epoch < epochs; epoch++) {
         double d_weight = 0.0;
         double d_bias = 0.0;
@@ -56,6 +57,7 @@ int cnk_ml_linear_regression_fit(
             d_bias += error;
         }
 
+        /* Average the gradients */
         d_weight = (2.0 / n) * d_weight;
         d_bias = (2.0 / n) * d_bias;
 

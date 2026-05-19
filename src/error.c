@@ -12,6 +12,7 @@
 #define THREAD_LOCAL
 #endif
 
+/* Thread-local state for error reporting to ensure thread safety */
 static THREAD_LOCAL cnk_error_code last_error_code = CNK_SUCCESS;
 static THREAD_LOCAL const char* last_error_message = "Success";
 
@@ -29,6 +30,7 @@ const char* cnk_error_string(cnk_error_code code) {
 
 void cnk_set_last_error(cnk_error_code code, const char* message) {
     last_error_code = code;
+    /* Use the provided message, or fall back to the default string for the code */
     last_error_message = message ? message : cnk_error_string(code);
 }
 

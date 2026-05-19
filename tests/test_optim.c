@@ -60,8 +60,21 @@ static void test_optim_invalid_arguments(void) {
     EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
 }
 
+static void test_optim_nan_inf(void) {
+    double result = 0.0;
+
+    /* Numerical derivative with NAN */
+    EXPECT_TRUE(cnk_optim_numerical_derivative(quadratic, NAN, 1e-6, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    /* Gradient descent with INFINITY */
+    EXPECT_TRUE(cnk_optim_gradient_descent_1d(quadratic, INFINITY, 0.1, 10, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+}
+
 TEST_SUITE("Optimization and Solvers")
     RUN_TEST(test_numerical_derivative);
     RUN_TEST(test_gradient_descent);
     RUN_TEST(test_optim_invalid_arguments);
+    RUN_TEST(test_optim_nan_inf);
 TEST_SUITE_END()

@@ -140,6 +140,14 @@ static void test_invalid_arguments(void) {
 
     EXPECT_TRUE(cnk_matrix_set(NULL, 0, 0, 1.0) == -1);
     EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    /* Non-square matrix for gaussian solve */
+    cnk_matrix *rect = cnk_matrix_create(2, 3);
+    cnk_vector *vec = cnk_vector_create(2);
+    EXPECT_NULL(cnk_linalg_solve_gaussian(rect, vec));
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_DIMENSION_MISMATCH);
+    cnk_matrix_free(rect);
+    cnk_vector_free(vec);
 }
 
 static void test_singular_matrix_error(void) {
@@ -165,6 +173,56 @@ static void test_singular_matrix_error(void) {
     cnk_vector_free(b);
 }
 
+static void test_nan_inf_propagation(void) {
+    cnk_vector *v = cnk_vector_create(1);
+    cnk_matrix *m = cnk_matrix_create(1, 1);
+    
+    EXPECT_NOT_NULL(v);
+    EXPECT_NOT_NULL(m);
+    
+    /* Test NAN */
+    EXPECT_TRUE(cnk_vector_set(v, 0, NAN) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_MATH);
+    
+    EXPECT_TRUE(cnk_matrix_set(m, 0, 0, NAN) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_MATH);
+    
+    /* Test INFINITY */
+    EXPECT_TRUE(cnk_vector_set(v, 0, INFINITY) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_MATH);
+    
+    EXPECT_TRUE(cnk_matrix_set(m, 0, 0, INFINITY) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_MATH);
+    
+    cnk_vector_free(v);
+    cnk_matrix_free(m);
+}
+
+static void test_near_singular_matrix(void) {
+    cnk_matrix *A = cnk_matrix_create(2, 2);
+    cnk_vector *b = cnk_vector_create(2);
+
+    EXPECT_NOT_NULL(A);
+    EXPECT_NOT_NULL(b);
+
+    /* Construct a matrix with a determinant < 1e-12 */
+    cnk_matrix_set(A, 0, 0, 1.0);
+    cnk_matrix_set(A, 0, 1, 1.0);
+    cnk_matrix_set(A, 1, 0, 1.0);
+    cnk_matrix_set(A, 1, 1, 1.0 + 1e-15); /* Almost singular */
+    
+    cnk_vector_set(b, 0, 1.0);
+    cnk_vector_set(b, 1, 1.0);
+
+    cnk_vector *x = cnk_linalg_solve_gaussian(A, b);
+
+    EXPECT_NULL(x);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_SINGULAR_MATRIX);
+
+    cnk_matrix_free(A);
+    cnk_vector_free(b);
+}
+
 TEST_SUITE("Basic Operations and Error Handling")
     RUN_TEST(test_vector_dot);
     RUN_TEST(test_vector_norm2);
@@ -173,4 +231,6 @@ TEST_SUITE("Basic Operations and Error Handling")
     RUN_TEST(test_error_handling);
     RUN_TEST(test_invalid_arguments);
     RUN_TEST(test_singular_matrix_error);
+    RUN_TEST(test_nan_inf_propagation);
+    RUN_TEST(test_near_singular_matrix);
 TEST_SUITE_END()

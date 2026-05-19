@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <math.h>
 
+/* 
+ * CNK_TEST_EPSILON defines the default tolerance for EXPECT_ALMOST_EQ.
+ * Test suites can override this before including test_framework.h
+ * if they require a different numerical tolerance.
+ */
 #ifndef CNK_TEST_EPSILON
 #define CNK_TEST_EPSILON 1e-9
 #endif

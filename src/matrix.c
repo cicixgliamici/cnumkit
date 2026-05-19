@@ -7,15 +7,18 @@
 
 #include "cnumkit/contracts.h"
 
+/* Helper to compute the flat array index for a given row and column (row-major order) */
 static size_t cnk_matrix_index(const cnk_matrix *m, size_t row, size_t col) {
     return row * m->cols + col;
 }
 
+/* Safely compute total elements without overflowing size_t */
 static int cnk_checked_matrix_count(size_t rows, size_t cols, size_t *count) {
     if (!count || rows == 0 || cols == 0) {
         return -1;
     }
 
+    /* Check if multiplying rows * cols would overflow */
     if (rows > SIZE_MAX / cols) {
         return -1;
     }
@@ -144,10 +147,12 @@ cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_matrix *b) {
         return NULL;
     }
 
+    /* Standard O(n^3) matrix multiplication */
     for (size_t i = 0; i < a->rows; i++) {
         for (size_t j = 0; j < b->cols; j++) {
             double sum = 0.0;
 
+            /* Compute dot product of a's i-th row and b's j-th column */
             for (size_t k = 0; k < a->cols; k++) {
                 sum += cnk_matrix_get(a, i, k) * cnk_matrix_get(b, k, j);
             }

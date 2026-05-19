@@ -10,22 +10,26 @@
 cnk_vector *cnk_vector_create(size_t size) {
     CNK_REQUIRES(size > 0);
 
+    /* Validate input size to prevent meaningless allocations */
     if (size == 0) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Vector size must be greater than zero");
         return NULL;
     }
 
+    /* Prevent size_t overflow during memory allocation calculation */
     if (size > SIZE_MAX / sizeof(double)) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Vector size overflows allocation size");
         return NULL;
     }
 
+    /* Allocate the wrapper structure */
     cnk_vector *v = malloc(sizeof(cnk_vector));
     if (!v) {
         cnk_set_last_error(CNK_ERROR_ALLOCATION, "Failed to allocate vector structure");
         return NULL;
     }
 
+    /* Allocate and zero-initialize the contiguous data buffer */
     v->data = calloc(size, sizeof(double));
     if (!v->data) {
         free(v);
@@ -68,6 +72,7 @@ int cnk_vector_set(cnk_vector *v, size_t index, double value) {
         return -1;
     }
 
+    /* Guard against propagating NaN or Infinity values */
     if (!isfinite(value)) {
         cnk_set_last_error(CNK_ERROR_MATH, "Vector value must be finite");
         return -1;
@@ -94,6 +99,7 @@ int cnk_vector_dot(const cnk_vector *a, const cnk_vector *b, double *result) {
 
     double sum = 0.0;
 
+    /* Compute the standard scalar dot product */
     for (size_t i = 0; i < a->size; i++) {
         sum += a->data[i] * b->data[i];
     }
