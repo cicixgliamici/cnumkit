@@ -1,6 +1,6 @@
 # cnumkit
 
-`cnumkit` is a small C11 library for scientific computing. The current focus is a reviewer-ready scalar core: predictable APIs, explicit error handling, strong tests, and a clean path toward architecture-specific acceleration such as RISC-V Vector Extension support.
+`cnumkit` is a small educational C11 scientific-computing library. It demonstrates predictable APIs, explicit ownership and error handling, numerical reasoning, strict tests, and portable build practices. It is a scalar reference project, not a replacement for production libraries such as BLAS or LAPACK.
 
 ## Current Modules
 
@@ -32,10 +32,22 @@ ctest --test-dir build --output-on-failure
 Useful reviewer configurations:
 
 ```bash
-cmake -S . -B build-contracts -DCNUMKIT_ENABLE_CONTRACTS=ON
-cmake -S . -B build-sanitize -DCNUMKIT_ENABLE_SANITIZERS=ON
-cmake -S . -B build-static -DBUILD_SHARED_LIBS=OFF
+cmake -S . -B build-contracts -DCMAKE_BUILD_TYPE=Debug -DCNUMKIT_ENABLE_CONTRACTS=ON
+cmake -S . -B build-sanitize -DCMAKE_BUILD_TYPE=Debug -DCNUMKIT_ENABLE_SANITIZERS=ON
+cmake -S . -B build-static -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+cmake -S . -B build-strict -DCMAKE_BUILD_TYPE=Debug -DCNUMKIT_WARNINGS_AS_ERRORS=ON
 ```
+
+Each build directory is independent. Build and test a selected configuration with:
+
+```bash
+cmake --build build-strict --config Debug --parallel
+ctest --test-dir build-strict -C Debug --output-on-failure
+```
+
+GitHub Actions is configured to repeat strict Debug and Release builds with GCC, Clang, and MSVC. The matrix covers static and shared libraries, opt-in contracts, and a Clang sanitizer build.
+
+Contract-enabled builds are compiled separately because contracts intentionally abort on violated preconditions, while the current negative tests verify recoverable runtime error handling in-process. Dedicated contract death tests are planned before contract-enabled CTest execution is enabled.
 
 ## Minimal Example
 
@@ -80,8 +92,10 @@ RISC-V support starts with cross-compilation and smoke tests against the scalar 
 
 ## Documentation
 
-- `docs/USER_GUIDE.md` explains normal usage and safety behavior.
-- `docs/LIBRARY_ARCHITECTURE.md` explains how the library is organized internally.
-- `docs/PROJECT_STATUS.md` summarizes the current implementation state.
-- `docs/REVIEWER_ROADMAP.md` tracks the remaining reviewer-readiness work.
-- `docs/RISCV.md` explains the first RISC-V cross-build path.
+- `docs/USER_GUIDE.md`: normal use, ownership, and failure handling.
+- `docs/LIBRARY_ARCHITECTURE.md`: internal modules and data flow.
+- `docs/NUMERICAL_NOTES.md`: tolerances, stability checks, residuals, and limits.
+- `docs/DEVELOPMENT_GUIDE.md`: reading order, invariants, workflow, and definition of done.
+- `docs/PROJECT_STATUS.md`: verified baseline and maturity assessment.
+- `docs/REVIEWER_ROADMAP.md`: ordered reviewer-readiness work.
+- `docs/RISCV.md`: unverified scalar RISC-V cross-build path.

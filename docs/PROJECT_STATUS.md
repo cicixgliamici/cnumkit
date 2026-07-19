@@ -1,66 +1,70 @@
-# Stato Attuale Del Progetto
+# Project Status
 
-Questo documento fotografa dove si trova oggi `cnumkit` e cosa e gia stato implementato nella preparazione alla review.
+This document is the current, evidence-based snapshot of `cnumkit`. Historical work and previous test counts remain recorded in `local/LOCAL_CHANGELOG.md`.
 
-## Obiettivo
+## Project Goal
 
-`cnumkit` vuole essere una libreria C11 per calcolo scientifico: piccola, leggibile, robusta, testata e pronta a crescere verso backend ottimizzati. La direzione tecnica attuale e costruire prima un core scalare affidabile, poi usare quel core come riferimento per ottimizzazioni future, inclusa RISC-V RVV.
+`cnumkit` is an educational C11 scientific-computing library. Its purpose is to demonstrate readable API design, explicit memory ownership, recoverable error handling, numerical reasoning, testing, and portable builds. It is not intended to replace production libraries such as BLAS or LAPACK.
 
-## Struttura Della Repo
+The development strategy is deliberately scalar-first: establish a small, trustworthy reference implementation before adding more algorithms, packaging, benchmarks, or architecture-specific acceleration.
 
-- `include/`: API pubbliche e header umbrella `cnumkit.h`.
-- `src/`: implementazioni dei moduli.
-- `tests/`: test unitari leggeri con framework interno.
-- `examples/`: esempi d'uso della libreria.
-- `docs/`: guide, note architetturali e documentazione per reviewer.
-- `cmake/toolchains/`: toolchain file per cross-build, inclusa RISC-V.
+## Implemented Modules
 
-## Funzionalita Implementate
+- Dynamic dense vectors with creation, indexed access, mutation, dot product, and L2 norm.
+- Dynamic dense row-major matrices with creation, indexed access, identity construction, and multiplication.
+- Gaussian elimination with partial pivoting and a scale-relative pivot threshold.
+- Central-difference numerical derivative and one-dimensional gradient descent.
+- Educational one-dimensional linear regression and mean squared error.
+- Thread-local error codes and bounded copied error messages.
+- Optional fail-fast runtime contracts.
 
-Il core attuale include:
+## Established Guarantees
 
-- vettori dinamici con allocazione, accesso, scrittura, dot product e norma L2;
-- matrici dense row-major con allocazione, identita e moltiplicazione;
-- solver lineare tramite eliminazione gaussiana con pivoting parziale;
-- derivata numerica e gradient descent 1D;
-- regressione lineare 1D e mean squared error;
-- gestione errori thread-local tramite `cnk_get_last_error()` e `cnk_get_last_error_message()`.
+- Public operations validate runtime inputs even when contracts are disabled.
+- Vector and matrix allocation checks reject zero sizes and `size_t` overflow.
+- Successful public operations clear the thread-local error state.
+- Error inspection does not modify the current error state.
+- Caller-provided outputs and models remain unchanged on failure.
+- Setters and numerical algorithms reject non-finite inputs or results.
+- Created vectors and matrices are owned by the caller and released by their matching free functions.
+- Scalar getters return `0.0` on failure; callers must inspect the error state when zero is ambiguous.
 
-## Hardening Gia Fatto
+## Verified Baseline
 
-La preparazione alla review ha introdotto o consolidato questi punti:
+The latest local verification was performed on 2026-07-19 with MinGW GCC 15.1.0, CMake, and Ninja:
 
-- API pubbliche con validazione runtime degli input invece di affidarsi agli `assert`.
-- Contratti `CNK_REQUIRES` e `CNK_ENSURES` resi opt-in tramite `CNUMKIT_ENABLE_CONTRACTS`.
-- Errori piu coerenti per puntatori nulli, dimension mismatch, matrici singolari, allocazioni fallite e risultati numerici non finiti.
-- Controlli contro overflow `size_t` nelle allocazioni di vettori e matrici.
-- Test negativi per input invalidi, dimensioni errate e matrici singolari.
-- CMake aggiornato con registrazione CTest e opzioni per contracts e sanitizer.
-- Fallback sorgente `include/cnumkit_export.h`, utile anche fuori da build CMake generate.
-- Prima traccia RISC-V: toolchain file `riscv64-linux-gnu` e guida `docs/RISCV.md`.
+- Strict Debug shared build: passed with warnings treated as errors.
+- Strict Release static build: passed with warnings treated as errors.
+- Contracts-enabled Debug static build: compiled successfully.
+- CTest: 3 of 3 suites passed in both tested runtime configurations.
+- `test_basic`: 91 assertions passed.
+- `test_optim`: 25 assertions passed.
+- `test_ml`: 39 assertions passed.
+- Total: 155 assertions passed, 0 failed.
+- `git diff --check`: no whitespace errors; only expected Windows line-ending notices.
 
-## Stato Delle Verifiche
+The numerical tests include analytic reference systems, normalized residuals, mandatory pivoting, 1x1 systems, uniform scales from `1e-150` to `1e150`, near-singular inputs, NaN/Inf rejection, optimization divergence, and ML overflow paths.
 
-Verifiche eseguite localmente:
+## Maturity Assessment
 
-- build diretta MinGW dei test con `-Wall -Wextra -Werror -pedantic`;
-- `test_basic`: 38 assert passati;
-- `test_optim`: 10 assert passati;
-- `test_ml`: 17 assert passati;
-- `git diff --check`: nessun problema di whitespace, solo warning CRLF normali su Windows.
+The repository is a solid educational pre-release. Its strongest aspects are its small modules, readable scalar algorithms, explicit ownership, allocation hardening, documented error policy, deterministic negative tests, and honest numerical limits.
 
-Limite attuale dell'ambiente:
+It is not production-ready. The following evidence is still missing:
 
-- `cmake` non e disponibile nel `PATH` della shell corrente, quindi la registrazione CTest e stata ispezionata ma non ancora verificata eseguendo davvero `cmake --build` e `ctest`.
+- A completed remote CI run across GCC, Clang, and MSVC.
+- Executed sanitizer and coverage reports.
+- Warning-free generated Doxygen output.
+- A complete installed CMake package usable through `find_package`.
+- Verification from a clean external consumer project.
+- RISC-V cross-build and QEMU test results.
+- Scalar performance baselines.
+- Condition-number-aware validation against an established numerical reference.
 
-## Cosa Manca Ancora
+## Pre-1.0 Design Decisions Still Open
 
-Prima di una review forte restano da completare:
+- Whether scalar getters and prediction should move to status-returning output-pointer APIs.
+- Whether vector and matrix structures should become opaque.
+- Whether the next linear-algebra milestone should introduce reusable LU factorization.
+- How optional optimized backends should be selected without changing the public API.
 
-- verifica CMake/CTest reale su una macchina con CMake disponibile;
-- policy API completa e documentata per ogni funzione pubblica;
-- test piu ampi su NaN/Inf, output pointer nulli, near-singular system e casi numerici di riferimento;
-- generazione Doxygen verificata;
-- smoke test RISC-V via cross-build e QEMU;
-- benchmark scalari minimi prima di qualsiasi ottimizzazione RVV;
-- controllo install/export da un progetto consumer esterno.
+See `docs/REVIEWER_ROADMAP.md` for the ordered development plan and `docs/DEVELOPMENT_GUIDE.md` for the maintainer workflow.

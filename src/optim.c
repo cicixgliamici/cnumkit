@@ -21,16 +21,17 @@ int cnk_optim_numerical_derivative(
         return -1;
     }
 
-    /* Compute central difference approximation */
+    /* Central difference is more accurate than a one-sided estimate at the same step size. */
     double fx_plus = f(x + h);
     double fx_minus = f(x - h);
 
-    *result = (fx_plus - fx_minus) / (2.0 * h);
-    if (!isfinite(*result)) {
+    double derivative = (fx_plus - fx_minus) / (2.0 * h);
+    if (!isfinite(derivative)) {
         cnk_set_last_error(CNK_ERROR_MATH, "Numerical derivative produced a non-finite result");
         return -1;
     }
 
+    *result = derivative;
     cnk_set_last_error(CNK_SUCCESS, NULL);
     return 0;
 }
@@ -61,7 +62,6 @@ int cnk_optim_gradient_descent_1d(
             return -1;
         }
 
-        /* Update the point using the gradient descent rule */
         x = x - learning_rate * gradient;
         if (!isfinite(x)) {
             cnk_set_last_error(CNK_ERROR_MATH, "Gradient descent diverged to a non-finite value");

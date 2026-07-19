@@ -14,9 +14,23 @@
 #define CNK_TEST_EPSILON 1e-9
 #endif
 
+#ifndef CNK_TEST_RELATIVE_EPSILON
+#define CNK_TEST_RELATIVE_EPSILON CNK_TEST_EPSILON
+#endif
+
 static int tests_run = 0;
 static int tests_passed = 0;
 static int tests_failed = 0;
+
+static int cnk_test_almost_equal(double actual, double expected) {
+    if (!isfinite(actual) || !isfinite(expected)) {
+        return actual == expected;
+    }
+
+    double difference = fabs(actual - expected);
+    double scale = fmax(fabs(actual), fabs(expected));
+    return difference <= CNK_TEST_EPSILON + CNK_TEST_RELATIVE_EPSILON * scale;
+}
 
 #define EXPECT_TRUE(cond) \
     do { \
@@ -30,7 +44,7 @@ static int tests_failed = 0;
 
 #define EXPECT_FALSE(cond) EXPECT_TRUE(!(cond))
 
-#define EXPECT_ALMOST_EQ(a, b) EXPECT_TRUE(fabs((a) - (b)) < CNK_TEST_EPSILON)
+#define EXPECT_ALMOST_EQ(a, b) EXPECT_TRUE(cnk_test_almost_equal((a), (b)))
 
 #define EXPECT_NOT_NULL(ptr) EXPECT_TRUE((ptr) != NULL)
 #define EXPECT_NULL(ptr) EXPECT_TRUE((ptr) == NULL)

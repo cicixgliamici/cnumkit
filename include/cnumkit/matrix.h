@@ -25,7 +25,8 @@ typedef struct {
  * 
  * @param rows Number of rows.
  * @param cols Number of columns.
- * @return A pointer to the newly created matrix, or NULL if memory allocation fails.
+ * @return A new owned matrix, or NULL on invalid dimensions or allocation failure.
+ * @note The caller must release a successful result with cnk_matrix_free().
  */
 /*@
   requires rows > 0 && cols > 0;
@@ -50,6 +51,7 @@ CNUMKIT_EXPORT void cnk_matrix_free(cnk_matrix *m);
  * @param row The 0-based row index.
  * @param col The 0-based column index.
  * @return The value at (row, col), or 0.0 if out of bounds or m is NULL.
+ * @note Check cnk_get_last_error() to distinguish an error from a valid 0.0 value.
  */
 /*@
   requires \valid(m);
@@ -64,7 +66,7 @@ CNUMKIT_EXPORT double cnk_matrix_get(const cnk_matrix *m, size_t row, size_t col
  * @param row The 0-based row index.
  * @param col The 0-based column index.
  * @param value The value to set.
- * @return 0 on success, or -1 if out of bounds or m is NULL.
+ * @return 0 on success, or -1 if the matrix/index is invalid or value is not finite.
  */
 /*@
   requires \valid(m);
@@ -78,7 +80,7 @@ CNUMKIT_EXPORT int cnk_matrix_set(cnk_matrix *m, size_t row, size_t col, double 
  * All diagonal elements are set to 1.0, and all other elements are 0.0.
  * 
  * @param n Size of the square identity matrix.
- * @return A pointer to the identity matrix, or NULL on allocation failure.
+ * @return A new owned identity matrix, or NULL on invalid size or allocation failure.
  */
 /*@
   requires n > 0;
@@ -95,6 +97,7 @@ CNUMKIT_EXPORT cnk_matrix *cnk_matrix_identity(size_t n);
  * @param a The left matrix.
  * @param b The right matrix.
  * @return A newly allocated matrix containing the result, or NULL on error.
+ * @note The caller owns the result. Non-finite arithmetic sets CNK_ERROR_MATH.
  */
 /*@
   requires \valid(a) && \valid(b);
@@ -109,6 +112,7 @@ CNUMKIT_EXPORT cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_ma
  * Each row is printed on a new line enclosed in brackets.
  * 
  * @param m Pointer to the matrix.
+ * @note Invalid input is printed as `(null matrix)` and sets CNK_ERROR_INVALID_ARGUMENT.
  */
 CNUMKIT_EXPORT void cnk_matrix_print(const cnk_matrix *m);
 

@@ -1,12 +1,24 @@
 #include "cnumkit.h"
 
+#include <float.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 #include "cnumkit/contracts.h"
 
-#define CNK_EPSILON 1e-12
+#define CNK_PIVOT_TOLERANCE_FACTOR 32.0
+
+static int pivot_is_too_small(double pivot_abs, double matrix_scale, size_t size) {
+    if (matrix_scale == 0.0) {
+        return 1;
+    }
+
+    /* A relative ratio keeps the decision unchanged when the system is rescaled. */
+    double relative_pivot = pivot_abs / matrix_scale;
+    double tolerance = CNK_PIVOT_TOLERANCE_FACTOR * DBL_EPSILON * (double)size;
+    return relative_pivot <= tolerance;
+}
 
 static void swap_rows(double *data, size_t cols, size_t row_a, size_t row_b) {
     if (row_a == row_b) {
@@ -57,12 +69,31 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
         return NULL;
     }
 
+    double matrix_scale = 0.0;
+
     for (size_t i = 0; i < n; i++) {
         for (size_t j = 0; j < n; j++) {
-            aug[i * aug_cols + j] = cnk_matrix_get(A, i, j);
+            double value = cnk_matrix_get(A, i, j);
+            if (!isfinite(value)) {
+                free(aug);
+                cnk_set_last_error(CNK_ERROR_MATH, "Coefficient matrix must contain finite values");
+                return NULL;
+            }
+            aug[i * aug_cols + j] = value;
+
+            double value_abs = fabs(value);
+            if (value_abs > matrix_scale) {
+                matrix_scale = value_abs;
+            }
         }
 
-        aug[i * aug_cols + n] = cnk_vector_get(b, i);
+        double rhs_value = cnk_vector_get(b, i);
+        if (!isfinite(rhs_value)) {
+            free(aug);
+            cnk_set_last_error(CNK_ERROR_MATH, "Right-hand side vector must contain finite values");
+            return NULL;
+        }
+        aug[i * aug_cols + n] = rhs_value;
     }
 
     /*
@@ -82,7 +113,7 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
             }
         }
 
-        if (max_abs < CNK_EPSILON) {
+        if (pivot_is_too_small(max_abs, matrix_scale, n)) {
             free(aug);
             cnk_set_last_error(CNK_ERROR_SINGULAR_MATRIX, "Matrix is singular or nearly singular");
             return NULL;
@@ -118,14 +149,20 @@ cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) 
 
         double diagonal = aug[i * aug_cols + i];
 
-        if (fabs(diagonal) < CNK_EPSILON) {
+        if (pivot_is_too_small(fabs(diagonal), matrix_scale, n)) {
             cnk_vector_free(x);
             free(aug);
             cnk_set_last_error(CNK_ERROR_SINGULAR_MATRIX, "Matrix is singular or nearly singular");
             return NULL;
         }
 
-        cnk_vector_set(x, i, sum / diagonal);
+        double solution_value = sum / diagonal;
+        if (!isfinite(solution_value) || cnk_vector_set(x, i, solution_value) != 0) {
+            cnk_vector_free(x);
+            free(aug);
+            cnk_set_last_error(CNK_ERROR_MATH, "Linear solve produced a non-finite result");
+            return NULL;
+        }
     }
 
     free(aug);

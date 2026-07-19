@@ -6,6 +6,8 @@ USE_MDFILE_AS_MAINPAGE = README.md
 INPUT                  = README.md \
                          docs/USER_GUIDE.md \
                          docs/LIBRARY_ARCHITECTURE.md \
+                         docs/DEVELOPMENT_GUIDE.md \
+                         docs/NUMERICAL_NOTES.md \
                          docs/PROJECT_STATUS.md \
                          docs/REVIEWER_ROADMAP.md \
                          docs/RISCV.md \

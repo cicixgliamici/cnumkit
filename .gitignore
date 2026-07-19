@@ -16,9 +16,8 @@ Makefile
 compile_commands.json
 
 # IDE
+.agents
 .vscode/
 .idea/
 
-# User specifically requested roadmap to be ignored
-ROADMAP.md
-LOCAL_CHANGELOG.md
+local/

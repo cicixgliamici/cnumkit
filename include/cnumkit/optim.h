@@ -25,6 +25,8 @@ typedef double (*cnk_scalar_function)(double x);
  *          as to cause floating-point cancellation errors.
  * @param result Pointer to a double where the computed derivative will be stored.
  * @return 0 on success, or -1 on error.
+ * @note result remains unchanged on failure. Function evaluations and the final
+ *       derivative must be finite.
  */
 CNUMKIT_EXPORT int cnk_optim_numerical_derivative(
     cnk_scalar_function f,
@@ -44,6 +46,8 @@ CNUMKIT_EXPORT int cnk_optim_numerical_derivative(
  * @param iterations The maximum number of iterations to perform.
  * @param result Pointer to a double where the resulting x (the minimum) will be stored.
  * @return 0 on success, or -1 on error.
+ * @note result remains unchanged on failure. The learning rate must be positive,
+ *       iterations must be positive, and all intermediate values must be finite.
  */
 CNUMKIT_EXPORT int cnk_optim_gradient_descent_1d(
     cnk_scalar_function f,

@@ -17,13 +17,13 @@
  */
 #if defined(CNUMKIT_ENABLE_CONTRACTS)
 
-    /* We use assert, but we could hook this into our error handling system! */
+    /* Contract violations are programmer errors, so they terminate instead of returning API errors. */
     #define CNK_REQUIRES(condition) assert((condition) && "Precondition failed: " #condition)
     #define CNK_ENSURES(condition)  assert((condition) && "Postcondition failed: " #condition)
     
 #else
 
-    /* Zero overhead in Release */
+    /* Disabled contracts must not evaluate conditions or add runtime overhead. */
     #define CNK_REQUIRES(condition) ((void)0)
     #define CNK_ENSURES(condition)  ((void)0)
 

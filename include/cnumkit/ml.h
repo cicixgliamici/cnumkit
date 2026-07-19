@@ -25,7 +25,8 @@ typedef struct {
  * 
  * @param model Pointer to the trained linear regression model.
  * @param x The input feature value.
- * @return The predicted output value.
+ * @return The predicted output, or 0.0 on invalid/non-finite input or math failure.
+ * @note Check cnk_get_last_error() to distinguish an error from a valid 0.0 prediction.
  */
 CNUMKIT_EXPORT double cnk_ml_linear_regression_predict(
     const cnk_linear_regression_model *model,
@@ -44,6 +45,7 @@ CNUMKIT_EXPORT double cnk_ml_linear_regression_predict(
  * @param epochs The number of training iterations.
  * @param model Pointer to the model structure to populate with optimized weights.
  * @return 0 on success, or -1 if the vectors mismatch in size or are NULL.
+ * @note model remains unchanged on failure. Inputs and learned parameters must be finite.
  */
 CNUMKIT_EXPORT int cnk_ml_linear_regression_fit(
     const cnk_vector *x,
@@ -63,6 +65,7 @@ CNUMKIT_EXPORT int cnk_ml_linear_regression_fit(
  * @param model Pointer to the linear regression model to evaluate.
  * @param result Pointer to a double where the computed MSE will be stored.
  * @return 0 on success, or -1 if the vectors mismatch in size or are NULL.
+ * @note result remains unchanged on failure. Inputs and model parameters must be finite.
  */
 CNUMKIT_EXPORT int cnk_ml_mean_squared_error(
     const cnk_vector *x,

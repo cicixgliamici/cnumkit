@@ -23,7 +23,8 @@ typedef struct {
  * The memory is allocated dynamically and initialized to zero.
  * 
  * @param size Number of elements.
- * @return A pointer to the newly created vector, or NULL if memory allocation fails.
+ * @return A new owned vector, or NULL on invalid size or allocation failure.
+ * @note The caller must release a successful result with cnk_vector_free().
  */
 /*@
   requires size > 0;
@@ -38,7 +39,7 @@ CNUMKIT_EXPORT cnk_vector *cnk_vector_create(size_t size);
  */
 /*@
   requires v == \null || \valid(v);
-  assigns \empty; // Simplification for demonstration
+  assigns *v, v->data[0 .. v->size - 1];
 */
 CNUMKIT_EXPORT void cnk_vector_free(cnk_vector *v);
 
@@ -48,6 +49,7 @@ CNUMKIT_EXPORT void cnk_vector_free(cnk_vector *v);
  * @param v Pointer to the vector.
  * @param index The 0-based index of the element.
  * @return The value at the specified index, or 0.0 if the index is out of bounds or v is NULL.
+ * @note Check cnk_get_last_error() to distinguish an error from a valid 0.0 value.
  */
 /*@
   requires \valid(v);
@@ -61,7 +63,7 @@ CNUMKIT_EXPORT double cnk_vector_get(const cnk_vector *v, size_t index);
  * @param v Pointer to the vector.
  * @param index The 0-based index of the element.
  * @param value The value to set.
- * @return 0 on success, or -1 if the index is out of bounds or v is NULL.
+ * @return 0 on success, or -1 if the vector/index is invalid or value is not finite.
  */
 CNUMKIT_EXPORT int cnk_vector_set(cnk_vector *v, size_t index, double value);
 
@@ -75,6 +77,7 @@ CNUMKIT_EXPORT int cnk_vector_set(cnk_vector *v, size_t index, double value);
  * @param b Pointer to the second vector.
  * @param result Pointer to a double where the result will be stored.
  * @return 0 on success, or -1 on dimension mismatch or NULL pointers.
+ * @note result remains unchanged on failure.
  */
 /*@
   requires \valid(a) && \valid(b);
@@ -88,7 +91,8 @@ CNUMKIT_EXPORT int cnk_vector_dot(const cnk_vector *a, const cnk_vector *b, doub
  * 
  * @param v Pointer to the vector.
  * @param result Pointer to a double where the calculated norm will be stored.
- * @return 0 on success, or -1 if v is NULL.
+ * @return 0 on success, or -1 if v or result is invalid.
+ * @note result remains unchanged on failure.
  */
 CNUMKIT_EXPORT int cnk_vector_norm2(const cnk_vector *v, double *result);
 
@@ -98,6 +102,7 @@ CNUMKIT_EXPORT int cnk_vector_norm2(const cnk_vector *v, double *result);
  * Formats the vector as a horizontal array enclosed in brackets.
  * 
  * @param v Pointer to the vector.
+ * @note Invalid input is printed as `(null vector)` and sets CNK_ERROR_INVALID_ARGUMENT.
  */
 CNUMKIT_EXPORT void cnk_vector_print(const cnk_vector *v);
 

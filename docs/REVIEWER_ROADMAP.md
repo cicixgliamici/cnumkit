@@ -1,81 +1,123 @@
-# Roadmap Operativa Per La Review
+# Reviewer-Readiness Roadmap
 
-Questa roadmap descrive i prossimi passi pratici per portare `cnumkit` a una review tecnica forte. Non e una roadmap di prodotto ampia: il focus e rendere la repo verificabile, coerente e credibile come libreria C scientifica.
+This roadmap orders the remaining work by reviewer value. The goal is not to maximize the number of algorithms; it is to make every implemented capability understandable, reproducible, and supported by evidence.
 
-## Fase 1: Build E Test Riproducibili
+## Current Priority
 
-Obiettivo: chiunque cloni la repo deve poter costruire e testare il progetto senza interpretazioni.
+The 2026-07-19 MinGW baseline passes all 155 assertions with strict compiler warnings. The current API policy and first numerical-hardening pass are complete. The next priorities are documentation generation, remote CI evidence, and packaging from a clean consumer project.
 
-- Installare o rendere disponibile CMake nell'ambiente di sviluppo principale.
-- Verificare `cmake -S . -B build`, `cmake --build build` e `ctest --test-dir build --output-on-failure`.
-- Testare almeno build Debug, Release, static library e shared library.
-- Verificare `CNUMKIT_ENABLE_CONTRACTS=ON` e `CNUMKIT_ENABLE_SANITIZERS=ON` quando il compilatore li supporta.
+## Phase 1: Reproducible Build And Test
 
-Criterio di completamento: CMake e CTest passano localmente e il risultato e riportato nella documentazione di stato.
+Status: **advanced partial**.
 
-## Fase 2: Policy API Ed Errori
+Completed locally:
 
-Obiettivo: ogni funzione pubblica deve avere comportamento prevedibile su successo e fallimento.
+- Strict Debug shared and Release static CMake builds.
+- CTest registration and successful execution of all three suites.
+- A contracts-enabled build.
+- A GitHub Actions matrix covering GCC, Clang, MSVC, static/shared linkage, contracts, and sanitizers.
 
-- Documentare per ogni API ownership, parametri validi, return value ed error code.
-- Rendere coerente il comportamento su `NULL`, dimensioni zero, mismatch, NaN/Inf e output pointer nullo.
-- Evitare che funzioni di sola lettura sovrascrivano l'errore globale in modo sorprendente, se non falliscono.
-- Decidere e documentare se i setter devono accettare o rifiutare valori non finiti.
+Remaining:
 
-Criterio di completamento: header e guide descrivono lo stesso contratto che i test verificano.
+- Run and confirm the GitHub Actions matrix remotely.
+- Add coverage reporting as supporting evidence, not as a substitute for meaningful numerical cases.
+- Add dedicated death tests before running negative tests with fail-fast contracts enabled.
 
-## Fase 3: Test Numerici E Negativi
+Completion criterion: all supported CI configurations pass from a clean checkout and the status document records the result.
 
-Obiettivo: aumentare fiducia senza gonfiare inutilmente il framework.
+## Phase 2: Public API And Error Policy
 
-- Aggiungere test per output pointer nulli in tutti i moduli.
-- Aggiungere test NaN/Inf per setter, ottimizzazione e ML.
-- Aggiungere casi near-singular e ill-conditioned per il solver.
-- Aggiungere test su dimensioni non quadrate e mismatch in `linalg`.
-- Dichiarare tolleranze per ogni suite numerica.
+Status: **complete for the current API**.
 
-Criterio di completamento: i test coprono sia il percorso felice sia i principali failure mode documentati.
+Completed:
 
-## Fase 4: Documentazione E Doxygen
+- Ownership, valid inputs, return values, and failure behavior are documented.
+- Null pointers, zero sizes, dimension mismatches, NaN/Inf, and output pointers have consistent runtime handling.
+- Successful operations, error inspection, and unchanged-on-failure outputs follow one documented policy.
+- Doxygen comments, implementation behavior, and regression tests are aligned.
 
-Obiettivo: la documentazione deve spiegare la libreria senza promettere funzioni non presenti.
+Deferred pre-1.0 decision: evaluate status-returning alternatives for scalar getters and prediction, whose `0.0` failure value is inherently ambiguous.
 
-- Generare Doxygen e correggere eventuali warning.
-- Tenere README breve e orientato a build, test, sicurezza e primo esempio.
-- Tenere `docs/LIBRARY_ARCHITECTURE.md` come spiegazione interna della libreria.
-- Mantenere `docs/PROJECT_STATUS.md` aggiornato quando cambia la base verificata.
+## Phase 3: Numerical And Negative Testing
 
-Criterio di completamento: Doxygen genera output senza warning critici e i documenti principali sono coerenti fra loro.
+Status: **complete for the current scalar core**.
 
-## Fase 5: RISC-V Scalar Readiness
+Completed:
 
-Obiettivo: dimostrare che il core scalare puo essere compilato e testato per RISC-V.
+- Combined absolute and relative test tolerances.
+- A scale-relative Gaussian pivot threshold.
+- Normalized residual checks and analytic reference solutions.
+- Tests for pivoting, 1x1 systems, near-singular systems, extreme uniform scales, non-finite data, divergence, and overflow.
+- Documentation of stability assumptions and intentional limits.
 
-- Verificare la toolchain `riscv64-linux-gnu-gcc`.
-- Verificare `qemu-riscv64` come emulatore per smoke test.
-- Eseguire build cross con `cmake/toolchains/riscv64-linux-gnu.cmake`.
-- Eseguire almeno i test core sotto QEMU prima di qualunque lavoro RVV.
+Deferred work: condition-number-aware cases and comparison with an established reference implementation should accompany reusable LU factorization.
 
-Criterio di completamento: build scalare RISC-V e smoke test passano e sono documentati in `docs/RISCV.md`.
+## Phase 4: Documentation And Doxygen
 
-## Fase 6: Benchmark Scalare E Preparazione RVV
+Status: **in progress**.
 
-Obiettivo: preparare l'ottimizzazione misurando prima il comportamento scalare.
+- Keep the README short and oriented toward scope, build, tests, and first use.
+- Maintain separate user, architecture, numerical, development, status, roadmap, and RISC-V documents.
+- Generate Doxygen and resolve warnings for all public API declarations.
+- Add an automated documentation check after local generation is clean.
+- Keep public claims tied to executed evidence.
 
-- Aggiungere benchmark minimi per dot product, norma, matrix multiply e solver.
-- Stabilire input piccoli, medi e grandi per misure ripetibili.
-- Definire un meccanismo futuro per backend opzionali senza cambiare API pubbliche.
-- Tenere RVV dietro opzione CMake o feature detection, con fallback scalare.
+Completion criterion: a new contributor can navigate the project from the README, and Doxygen generates without critical warnings.
 
-Criterio di completamento: esiste una baseline scalare misurabile prima di introdurre codice RVV.
+## Phase 5: Packaging And External Consumption
 
-## Fase 7: Packaging E Release Readiness
+Status: **partial**.
 
-Obiettivo: rendere la libreria consumabile da un progetto esterno.
+- Generate and install `cnumkit-config.cmake` and a version file.
+- Verify static and shared installation layouts.
+- Build a separate consumer using only `find_package(cnumkit REQUIRED)` and `cnumkit::cnumkit`.
+- Confirm generated export headers and Windows symbol visibility.
+- Define the public changelog and minimum criteria for a `v0.1.0` tag.
 
-- Verificare installazione CMake con `install()` ed export `cnumkit::cnumkit`.
-- Creare un piccolo progetto consumer esterno che usa `find_package(cnumkit REQUIRED)`.
-- Verificare header installati, libreria statica/shared e symbol export.
-- Preparare changelog pubblico e criteri minimi per tag `v0.1.0`.
+Completion criterion: a clean external project can find, include, link, and run against an installed `cnumkit` package.
 
-Criterio di completamento: un progetto esterno puo includere e linkare `cnumkit` usando solo l'installazione CMake.
+## Phase 6: Scalar API Expansion
+
+Status: **pending**.
+
+- Add foundational vector operations: copy, fill, add, subtract, scale, distance, and normalization.
+- Add foundational matrix operations: copy, add, subtract, transpose, matrix-vector multiplication, trace, and norms.
+- Introduce forward/back substitution and LU factorization with pivoting.
+- Add determinant and multi-right-hand-side solving only when they can reuse LU cleanly.
+- Add statistics and analytic linear regression only after the numerical core remains coherent.
+
+Completion criterion: each addition has documented ownership, failure behavior, analytic reference tests, and explicit numerical limits.
+
+## Phase 7: Scalar Performance Baseline
+
+Status: **pending**.
+
+- Benchmark dot product, norm, matrix-vector multiplication, matrix multiplication, Gaussian solve, and future LU solve.
+- Define repeatable small, medium, and large inputs.
+- Record compiler, flags, hardware, warm-up, repetitions, and reported statistic.
+- Profile before changing data layout or algorithm structure.
+
+Completion criterion: optimization decisions can cite repeatable scalar measurements.
+
+## Phase 8: RISC-V Scalar Readiness
+
+Status: **partial**.
+
+- Verify `riscv64-linux-gnu-gcc` and `qemu-riscv64`.
+- Cross-build with `cmake/toolchains/riscv64-linux-gnu.cmake`.
+- Execute the scalar tests under QEMU.
+- Record compiler, architecture, ABI, emulator, and runtime details.
+
+Completion criterion: the scalar RISC-V build and smoke tests pass and are reproducible from `docs/RISCV.md`.
+
+## Phase 9: Optional RVV Backend
+
+Status: **pending**.
+
+- Start with one measured kernel, preferably dot product.
+- Select RVV through explicit feature detection or a CMake option.
+- Keep scalar C as the correctness reference and fallback.
+- Add scalar/RVV parity tests using documented tolerances.
+- Benchmark before enabling any optimized path by default.
+
+Completion criterion: the RVV path is optional, measurably useful, and behaviorally equivalent to the scalar reference within declared tolerances.

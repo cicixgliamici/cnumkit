@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux / ${{ matrix.compiler }} / ${{ matrix.build_type }} / ${{ matrix.linkage }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: gcc
+            build_type: Debug
+            linkage: shared
+            shared: ON
+            contracts: OFF
+            sanitizers: OFF
+            run_tests: true
+          - compiler: gcc
+            build_type: Release
+            linkage: static
+            shared: OFF
+            contracts: OFF
+            sanitizers: OFF
+            run_tests: true
+          - compiler: clang
+            build_type: Debug
+            linkage: static-sanitized
+            shared: OFF
+            contracts: OFF
+            sanitizers: ON
+            run_tests: true
+          - compiler: gcc
+            build_type: Debug
+            linkage: static-contracts-build
+            shared: OFF
+            contracts: ON
+            sanitizers: OFF
+            run_tests: false
+    env:
+      CC: ${{ matrix.compiler }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DCNUMKIT_ENABLE_CONTRACTS=${{ matrix.contracts }} -DCNUMKIT_ENABLE_SANITIZERS=${{ matrix.sanitizers }} -DCNUMKIT_WARNINGS_AS_ERRORS=ON
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Test
+        if: matrix.run_tests
+        run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
+
+  windows:
+    name: Windows / MSVC / ${{ matrix.build_type }} / ${{ matrix.linkage }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - build_type: Debug
+            linkage: shared
+            shared: ON
+            contracts: OFF
+          - build_type: Release
+            linkage: static
+            shared: OFF
+            contracts: OFF
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Configure
+        run: cmake -S . -B build -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DCNUMKIT_ENABLE_CONTRACTS=${{ matrix.contracts }} -DCNUMKIT_WARNINGS_AS_ERRORS=ON
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Test
+        run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure

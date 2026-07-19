@@ -52,7 +52,7 @@ Every successful create call must be paired with the matching free call:
 - `cnk_vector_free`
 - `cnk_matrix_free`
 
-Passing `NULL` to the free functions is valid and does nothing.
+Passing `NULL` to a free function is valid. Like every successful public operation, it clears the thread-local error state.
 
 ## Error Model
 
@@ -70,13 +70,15 @@ const char *message = cnk_get_last_error_message();
 
 The main error categories are:
 
-- `CNK_ERROR_INVALID_ARGUMENT`: null pointers, zero sizes, invalid parameters, non-finite inputs, or dimension values that overflow allocation sizes.
+- `CNK_ERROR_INVALID_ARGUMENT`: null pointers, zero sizes, invalid parameters, invalid model state, or dimensions that overflow allocation sizes.
 - `CNK_ERROR_DIMENSION_MISMATCH`: incompatible vector or matrix dimensions.
 - `CNK_ERROR_SINGULAR_MATRIX`: singular or nearly singular linear systems.
 - `CNK_ERROR_ALLOCATION`: failed memory allocation.
-- `CNK_ERROR_MATH`: numerical divergence or non-finite computed results.
+- `CNK_ERROR_MATH`: rejected non-finite stored values, numerical divergence, or non-finite computed results.
 
-This gives callers a fail-soft production API while keeping function signatures small.
+Successful public operations clear the error state. Error-inspection functions leave it unchanged, and caller-provided outputs remain unchanged on failure. This provides recoverable runtime behavior while keeping the educational API small.
+
+Custom error messages are copied into a bounded thread-local buffer. The string returned by `cnk_get_last_error_message` is borrowed and remains valid until the next error-state update in the same thread.
 
 ## Contracts
 
@@ -122,6 +124,7 @@ Useful options:
 -DCNUMKIT_BUILD_EXAMPLES=ON
 -DCNUMKIT_ENABLE_CONTRACTS=ON
 -DCNUMKIT_ENABLE_SANITIZERS=ON
+-DCNUMKIT_WARNINGS_AS_ERRORS=ON
 ```
 
 Tests are registered through CTest when `BUILD_TESTING` and `CNUMKIT_BUILD_TESTS` are enabled.
@@ -147,3 +150,5 @@ Before review, the library should be able to show:
 - Documented ownership and error behavior.
 - Scalar correctness before optimized backend work.
 - RISC-V cross-build instructions, even before RVV acceleration exists.
+
+For the complete maintenance workflow and project invariants, see `docs/DEVELOPMENT_GUIDE.md`. For executed versus planned evidence, see `docs/PROJECT_STATUS.md`.

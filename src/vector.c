@@ -10,26 +10,25 @@
 cnk_vector *cnk_vector_create(size_t size) {
     CNK_REQUIRES(size > 0);
 
-    /* Validate input size to prevent meaningless allocations */
+    /* Zero-length vectors are excluded so every created object has a usable data buffer. */
     if (size == 0) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Vector size must be greater than zero");
         return NULL;
     }
 
-    /* Prevent size_t overflow during memory allocation calculation */
+    /* Validate the byte count before calloc performs the multiplication. */
     if (size > SIZE_MAX / sizeof(double)) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Vector size overflows allocation size");
         return NULL;
     }
 
-    /* Allocate the wrapper structure */
     cnk_vector *v = malloc(sizeof(cnk_vector));
     if (!v) {
         cnk_set_last_error(CNK_ERROR_ALLOCATION, "Failed to allocate vector structure");
         return NULL;
     }
 
-    /* Allocate and zero-initialize the contiguous data buffer */
+    /* Zero initialization gives constructors deterministic mathematical values. */
     v->data = calloc(size, sizeof(double));
     if (!v->data) {
         free(v);
@@ -42,16 +41,19 @@ cnk_vector *cnk_vector_create(size_t size) {
     CNK_ENSURES(v != NULL);
     CNK_ENSURES(v->size == size);
 
+    cnk_set_last_error(CNK_SUCCESS, NULL);
     return v;
 }
 
 void cnk_vector_free(cnk_vector *v) {
     if (!v) {
+        cnk_set_last_error(CNK_SUCCESS, NULL);
         return;
     }
 
     free(v->data);
     free(v);
+    cnk_set_last_error(CNK_SUCCESS, NULL);
 }
 
 double cnk_vector_get(const cnk_vector *v, size_t index) {
@@ -63,7 +65,9 @@ double cnk_vector_get(const cnk_vector *v, size_t index) {
         return 0.0;
     }
 
-    return v->data[index];
+    double value = v->data[index];
+    cnk_set_last_error(CNK_SUCCESS, NULL);
+    return value;
 }
 
 int cnk_vector_set(cnk_vector *v, size_t index, double value) {
@@ -72,13 +76,14 @@ int cnk_vector_set(cnk_vector *v, size_t index, double value) {
         return -1;
     }
 
-    /* Guard against propagating NaN or Infinity values */
+    /* Stored values stay finite so later algorithms can rely on the data invariant. */
     if (!isfinite(value)) {
         cnk_set_last_error(CNK_ERROR_MATH, "Vector value must be finite");
         return -1;
     }
 
     v->data[index] = value;
+    cnk_set_last_error(CNK_SUCCESS, NULL);
     return 0;
 }
 
@@ -99,7 +104,7 @@ int cnk_vector_dot(const cnk_vector *a, const cnk_vector *b, double *result) {
 
     double sum = 0.0;
 
-    /* Compute the standard scalar dot product */
+    /* This scalar loop is the correctness reference for future optimized backends. */
     for (size_t i = 0; i < a->size; i++) {
         sum += a->data[i] * b->data[i];
     }
@@ -128,6 +133,7 @@ int cnk_vector_norm2(const cnk_vector *v, double *result) {
 
 void cnk_vector_print(const cnk_vector *v) {
     if (!v || !v->data) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Invalid vector passed to cnk_vector_print");
         printf("(null vector)\n");
         return;
     }
@@ -141,4 +147,5 @@ void cnk_vector_print(const cnk_vector *v) {
         }
     }
     printf("]\n");
+    cnk_set_last_error(CNK_SUCCESS, NULL);
 }

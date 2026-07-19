@@ -7,12 +7,19 @@ double cnk_ml_linear_regression_predict(
     const cnk_linear_regression_model *model,
     double x
 ) {
-    if (!model) {
-        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null model passed to cnk_ml_linear_regression_predict");
+    if (!model || !isfinite(x) || !isfinite(model->weight) || !isfinite(model->bias)) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Prediction inputs and model parameters must be finite");
         return 0.0;
     }
 
-    return model->weight * x + model->bias;
+    double prediction = model->weight * x + model->bias;
+    if (!isfinite(prediction)) {
+        cnk_set_last_error(CNK_ERROR_MATH, "Linear regression prediction produced a non-finite result");
+        return 0.0;
+    }
+
+    cnk_set_last_error(CNK_SUCCESS, NULL);
+    return prediction;
 }
 
 int cnk_ml_linear_regression_fit(
@@ -41,7 +48,7 @@ int cnk_ml_linear_regression_fit(
     double bias = 0.0;
     double n = (double)x->size;
 
-    /* Run gradient descent for the specified number of epochs */
+    /* Start from zero to keep this educational optimizer deterministic. */
     for (int epoch = 0; epoch < epochs; epoch++) {
         double d_weight = 0.0;
         double d_bias = 0.0;
@@ -50,6 +57,11 @@ int cnk_ml_linear_regression_fit(
             double xi = cnk_vector_get(x, i);
             double yi = cnk_vector_get(y, i);
 
+            if (!isfinite(xi) || !isfinite(yi)) {
+                cnk_set_last_error(CNK_ERROR_MATH, "Training vectors must contain finite values");
+                return -1;
+            }
+
             double prediction = weight * xi + bias;
             double error = prediction - yi;
 
@@ -57,7 +69,7 @@ int cnk_ml_linear_regression_fit(
             d_bias += error;
         }
 
-        /* Average the gradients */
+        /* Averaging makes the update magnitude independent of dataset length. */
         d_weight = (2.0 / n) * d_weight;
         d_bias = (2.0 / n) * d_bias;
 
@@ -93,24 +105,38 @@ int cnk_ml_mean_squared_error(
         return -1;
     }
 
+    if (!isfinite(model->weight) || !isfinite(model->bias)) {
+        cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Model parameters must be finite");
+        return -1;
+    }
+
     double sum = 0.0;
 
     for (size_t i = 0; i < x->size; i++) {
         double xi = cnk_vector_get(x, i);
         double yi = cnk_vector_get(y, i);
 
+        if (!isfinite(xi) || !isfinite(yi)) {
+            cnk_set_last_error(CNK_ERROR_MATH, "Evaluation vectors must contain finite values");
+            return -1;
+        }
+
         double prediction = cnk_ml_linear_regression_predict(model, xi);
+        if (cnk_get_last_error() != CNK_SUCCESS) {
+            return -1;
+        }
         double error = prediction - yi;
 
         sum += error * error;
     }
 
-    *result = sum / (double)x->size;
-    if (!isfinite(*result)) {
+    double mse = sum / (double)x->size;
+    if (!isfinite(mse)) {
         cnk_set_last_error(CNK_ERROR_MATH, "Mean squared error produced a non-finite result");
         return -1;
     }
 
+    *result = mse;
     cnk_set_last_error(CNK_SUCCESS, NULL);
     return 0;
 }

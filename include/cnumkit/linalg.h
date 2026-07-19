@@ -14,13 +14,19 @@
  * @brief Solves a system of linear equations Ax = b using Gaussian elimination.
  * 
  * The algorithm uses partial pivoting for improved numerical stability.
+ * Pivot acceptance is relative to the largest coefficient in the input matrix,
+ * so uniform rescaling of A and b does not change the singularity decision.
  * The matrix A must be a square matrix, and the vector b must have the same 
  * number of elements as there are rows in A.
  * 
  * @param A The square coefficient matrix.
  * @param b The right-hand side constant vector.
  * @return A newly allocated vector x containing the solution, or NULL if the 
- *         matrix is singular or dimensions mismatch.
+ *         inputs are invalid, dimensions mismatch, allocation fails, values are
+ *         non-finite, or the matrix is singular.
+ * @note The caller owns the returned vector and must release it with cnk_vector_free().
+ * @note A small residual does not guarantee an accurate solution for an
+ *       ill-conditioned matrix. See docs/NUMERICAL_NOTES.md for limitations.
  */
 /*@
   requires \valid(A) && \valid(b);
