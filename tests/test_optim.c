@@ -17,6 +17,14 @@ static double non_finite_function(double x) {
     return NAN;
 }
 
+static double cubic(double x) {
+    return x * x * x - 2.0 * x;
+}
+
+static double shifted_quadratic(double x) {
+    return (x + 4.0) * (x + 4.0) + 7.0;
+}
+
 static void test_numerical_derivative(void) {
     /*
      * f(x) = (x - 3)^2
@@ -97,10 +105,32 @@ static void test_derivative_step_and_divergence(void) {
     EXPECT_ALMOST_EQ(result, 11.0);
 }
 
+static void test_derivative_at_negative_and_stationary_points(void) {
+    double derivative = 99.0;
+
+    /* The analytic derivative is 3x^2 - 2, including on the negative axis. */
+    EXPECT_TRUE(cnk_optim_numerical_derivative(cubic, -2.0, 1e-5, &derivative) == 0);
+    EXPECT_TRUE(fabs(derivative - 10.0) < 1e-8);
+    EXPECT_TRUE(cnk_optim_numerical_derivative(shifted_quadratic, -4.0,
+        1e-5, &derivative) == 0);
+    EXPECT_TRUE(fabs(derivative) < 1e-8);
+}
+
+static void test_gradient_descent_on_shifted_minimum(void) {
+    double minimum = 99.0;
+
+    EXPECT_TRUE(cnk_optim_gradient_descent_1d(shifted_quadratic,
+        6.0, 0.2, 80, &minimum) == 0);
+    EXPECT_TRUE(fabs(minimum + 4.0) < 1e-6);
+    EXPECT_TRUE(fabs(shifted_quadratic(minimum) - 7.0) < 1e-10);
+}
+
 TEST_SUITE("Optimization and Solvers")
     RUN_TEST(test_numerical_derivative);
     RUN_TEST(test_gradient_descent);
     RUN_TEST(test_optim_invalid_arguments);
     RUN_TEST(test_optim_nan_inf);
     RUN_TEST(test_derivative_step_and_divergence);
+    RUN_TEST(test_derivative_at_negative_and_stationary_points);
+    RUN_TEST(test_gradient_descent_on_shifted_minimum);
 TEST_SUITE_END()

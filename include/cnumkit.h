@@ -10,7 +10,8 @@ extern "C" {
  * keeps direct compiler builds possible, while the generated version supplies
  * the platform-specific import/export attributes required by shared libraries.
  */
-#include "cnumkit_export.h"
+/* Angle brackets let configured builds prefer CMake's generated export header. */
+#include <cnumkit_export.h>
 
 #include "cnumkit/vector.h"
 #include "cnumkit/matrix.h"
@@ -19,6 +20,9 @@ extern "C" {
 #include "cnumkit/ml.h"
 #include "cnumkit/error.h"
 #include "cnumkit/contracts.h"
+#include "cnumkit/view.h"
+#include "cnumkit/kernels.h"
+#include "cnumkit/adapters.h"
 
 #ifdef __cplusplus
 }

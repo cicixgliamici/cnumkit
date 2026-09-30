@@ -4,6 +4,7 @@
 
 ## Current Modules
 
+- Borrowed `f64` vector/matrix views, scalar kernels, and owned-object adapters.
 - Vectors and dense row-major matrices.
 - Basic linear algebra, including Gaussian elimination with partial pivoting.
 - Scalar numerical optimization helpers.
@@ -86,12 +87,27 @@ int main(void) {
 }
 ```
 
+## Executable Use Cases
+
+- `sensor_calibration`: copies interleaved measurements through a borrowed view,
+  applies baseline correction, transforms them with a matrix, and computes a norm.
+  Expected output: corrected `[1, -1, 3]`, calibrated `[0, -4]`, magnitude `4`.
+- `thermal_network`: builds and solves a two-node steady-state heat balance.
+  Expected interior temperatures: `[20, 10]`.
+- `borrowed_matvec`, `solve_linear_system`, and `linear_regression_demo` cover
+  direct matrix products, a general linear solve, and a fitted 1D model.
+
+The `test_math_scenarios` suite checks these mathematical compositions against
+independently calculated results alongside the focused kernel, solver,
+optimization, and ML tests.
+
 ## RISC-V Direction
 
 RISC-V support starts with cross-compilation and smoke tests against the scalar implementation. RVV acceleration should be added later as an optional backend with the scalar C implementation kept as the reference fallback.
 
 ## Documentation
 
+- `docs/BORROWED_KERNELS.md`: zero-copy layouts, aliasing, kernel errors, and examples.
 - `docs/USER_GUIDE.md`: normal use, ownership, and failure handling.
 - `docs/LIBRARY_ARCHITECTURE.md`: internal modules and data flow.
 - `docs/NUMERICAL_NOTES.md`: tolerances, stability checks, residuals, and limits.

@@ -9,6 +9,10 @@
 #include <stddef.h>
 #include "cnumkit_export.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Represents a dense 2D matrix stored in row-major order.
  */
@@ -115,5 +119,9 @@ CNUMKIT_EXPORT cnk_matrix *cnk_matrix_multiply(const cnk_matrix *a, const cnk_ma
  * @note Invalid input is printed as `(null matrix)` and sets CNK_ERROR_INVALID_ARGUMENT.
  */
 CNUMKIT_EXPORT void cnk_matrix_print(const cnk_matrix *m);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CNUMKIT_MATRIX_H */

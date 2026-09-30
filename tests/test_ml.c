@@ -141,9 +141,39 @@ static void test_ml_scaled_data_and_overflow(void) {
     cnk_vector_free(y);
 }
 
+static void test_prediction_and_mse_with_known_residuals(void) {
+    cnk_vector *inputs = cnk_vector_create(3);
+    cnk_vector *observations = cnk_vector_create(3);
+    cnk_linear_regression_model model = {2.0, -1.0};
+    double mse = -1.0;
+    EXPECT_NOT_NULL(inputs);
+    EXPECT_NOT_NULL(observations);
+    if (!inputs || !observations) {
+        cnk_vector_free(inputs);
+        cnk_vector_free(observations);
+        return;
+    }
+
+    /* Predictions are [-3, -1, 3]; residuals are [1, 0, -2]. */
+    const double x_values[] = {-1.0, 0.0, 2.0};
+    const double y_values[] = {-2.0, -1.0, 1.0};
+    for (size_t index = 0; index < 3; ++index) {
+        EXPECT_TRUE(cnk_vector_set(inputs, index, x_values[index]) == 0);
+        EXPECT_TRUE(cnk_vector_set(observations, index, y_values[index]) == 0);
+    }
+    EXPECT_ALMOST_EQ(cnk_ml_linear_regression_predict(&model, -1.0), -3.0);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_SUCCESS);
+    EXPECT_TRUE(cnk_ml_mean_squared_error(inputs, observations, &model, &mse) == 0);
+    EXPECT_ALMOST_EQ(mse, 5.0 / 3.0);
+
+    cnk_vector_free(inputs);
+    cnk_vector_free(observations);
+}
+
 TEST_SUITE("Machine Learning")
     RUN_TEST(test_linear_regression_fit);
     RUN_TEST(test_linear_regression_invalid_arguments);
     RUN_TEST(test_ml_nan_inf);
     RUN_TEST(test_ml_scaled_data_and_overflow);
+    RUN_TEST(test_prediction_and_mse_with_known_residuals);
 TEST_SUITE_END()

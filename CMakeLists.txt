@@ -44,6 +44,11 @@ add_library(cnumkit
     src/optim.c
     src/ml.c
     src/error.c
+    src/view.c
+    src/kernels_scalar.c
+    src/kernels_matrix.c
+    src/view_validation.c
+    src/adapters.c
 )
 
 # Match the installed namespace when the target is consumed in-tree.
@@ -84,6 +89,7 @@ endif()
 # Tests and Examples
 # -----------------
 option(CNUMKIT_BUILD_TESTS "Build tests" ON)
+option(CNUMKIT_BUILD_CPP_SMOKE_TEST "Verify individual public headers from C++" OFF)
 if(CNUMKIT_BUILD_TESTS AND BUILD_TESTING)
     add_executable(test_basic tests/test_basic.c)
     target_link_libraries(test_basic PRIVATE cnumkit)
@@ -99,10 +105,40 @@ if(CNUMKIT_BUILD_TESTS AND BUILD_TESTING)
     target_link_libraries(test_ml PRIVATE cnumkit)
     cnumkit_apply_project_options(test_ml)
     add_test(NAME test_ml COMMAND test_ml)
+
+    add_executable(test_kernels tests/test_kernels.c)
+    target_link_libraries(test_kernels PRIVATE cnumkit)
+    cnumkit_apply_project_options(test_kernels)
+    add_test(NAME test_kernels COMMAND test_kernels)
+
+    add_executable(test_matrix_kernels tests/test_matrix_kernels.c)
+    target_link_libraries(test_matrix_kernels PRIVATE cnumkit)
+    cnumkit_apply_project_options(test_matrix_kernels)
+    add_test(NAME test_matrix_kernels COMMAND test_matrix_kernels)
+
+    # Scenario tests check mathematical results across multiple public modules.
+    add_executable(test_math_scenarios tests/test_math_scenarios.c)
+    target_link_libraries(test_math_scenarios PRIVATE cnumkit)
+    cnumkit_apply_project_options(test_math_scenarios)
+    add_test(NAME test_math_scenarios COMMAND test_math_scenarios)
+
+    # A C-only consumer should not need a C++ compiler to configure the library.
+    if(CNUMKIT_BUILD_CPP_SMOKE_TEST)
+        enable_language(CXX)
+        add_executable(test_cpp_headers tests/test_cpp_headers.cpp)
+        target_link_libraries(test_cpp_headers PRIVATE cnumkit)
+        target_compile_features(test_cpp_headers PRIVATE cxx_std_11)
+        cnumkit_apply_project_options(test_cpp_headers)
+        add_test(NAME test_cpp_headers COMMAND test_cpp_headers)
+    endif()
 endif()
 
 option(CNUMKIT_BUILD_EXAMPLES "Build examples" ON)
 if(CNUMKIT_BUILD_EXAMPLES)
+    add_executable(borrowed_matvec examples/borrowed_matvec.c)
+    target_link_libraries(borrowed_matvec PRIVATE cnumkit)
+    cnumkit_apply_project_options(borrowed_matvec)
+
     add_executable(solve_linear_system examples/solve_linear_system.c)
     target_link_libraries(solve_linear_system PRIVATE cnumkit)
     cnumkit_apply_project_options(solve_linear_system)
@@ -110,6 +146,14 @@ if(CNUMKIT_BUILD_EXAMPLES)
     add_executable(linear_regression_demo examples/linear_regression_demo.c)
     target_link_libraries(linear_regression_demo PRIVATE cnumkit)
     cnumkit_apply_project_options(linear_regression_demo)
+
+    add_executable(sensor_calibration examples/sensor_calibration.c)
+    target_link_libraries(sensor_calibration PRIVATE cnumkit)
+    cnumkit_apply_project_options(sensor_calibration)
+
+    add_executable(thermal_network examples/thermal_network.c)
+    target_link_libraries(thermal_network PRIVATE cnumkit)
+    cnumkit_apply_project_options(thermal_network)
 endif()
 
 # -----------------

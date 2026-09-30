@@ -3,6 +3,10 @@
 
 #include "cnumkit_export.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file error.h
  * @brief Thread-local error reporting for public cnumkit operations.
@@ -58,5 +62,9 @@ CNUMKIT_EXPORT cnk_error_code cnk_get_last_error(void);
  * @note This function does not modify the thread-local error state.
  */
 CNUMKIT_EXPORT const char* cnk_get_last_error_message(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CNUMKIT_ERROR_H */

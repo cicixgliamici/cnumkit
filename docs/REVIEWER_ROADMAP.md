@@ -4,6 +4,20 @@ This roadmap orders the remaining work by reviewer value. The goal is not to max
 
 ## Current Priority
 
+The 2026-09-29 borrowed-kernel increment adds scalar copy, robust norm, matrix
+products, owned-object adapters, and direct C++ header verification. Strict
+Debug/shared and Release/static configurations pass six CTest cases, and local
+Linux ASan/UBSan execution passes all five C suites. Installed-package consumer
+verification and version policy are the next foundation tasks. See
+`PROJECT_STATUS.md` and `BORROWED_KERNELS.md` for current evidence and limits.
+
+The 2026-09-30 scenario increment adds a sixth C suite, two runnable use cases,
+and analytic checks for optimization and ML. All six C suites pass the direct
+Linux ASan/UBSan build; CMake registration for the new targets still needs a
+fresh CMake run.
+
+## Previous Reviewer Baseline
+
 The 2026-07-19 MinGW baseline passes all 155 assertions with strict compiler warnings. The current API policy and first numerical-hardening pass are complete. The next priorities are documentation generation, remote CI evidence, and packaging from a clean consumer project.
 
 ## Phase 1: Reproducible Build And Test

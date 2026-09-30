@@ -12,6 +12,14 @@ Tests use a combined absolute and relative comparison:
 
 The absolute term protects comparisons near zero. The relative term makes the same reference test meaningful across different numerical scales. Each suite may override both tolerances when its algorithm has different convergence accuracy.
 
+## Borrowed Kernels
+
+Borrowed kernel layout, aliasing, scaled-norm behavior, and platform-dependent
+dot accumulation are documented separately in `BORROWED_KERNELS.md`. Legacy
+vector dot/norm now use that same implementation. Norm regression assertions
+normalize extreme results before comparison so the absolute test tolerance
+cannot incorrectly accept an underflowed zero.
+
 ## Gaussian Elimination
 
 `cnk_linalg_solve_gaussian` uses partial pivoting. At each elimination step it selects the remaining entry with the largest absolute value in the active column.

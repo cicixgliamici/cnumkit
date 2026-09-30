@@ -102,16 +102,11 @@ int cnk_vector_dot(const cnk_vector *a, const cnk_vector *b, double *result) {
         return -1;
     }
 
-    double sum = 0.0;
-
-    /* This scalar loop is the correctness reference for future optimized backends. */
-    for (size_t i = 0; i < a->size; i++) {
-        sum += a->data[i] * b->data[i];
-    }
-
-    *result = sum;
-    cnk_set_last_error(CNK_SUCCESS, NULL);
-    return 0;
+    /* Reuse the finite checks and numerical policy of the borrowed-view core. */
+    cnk_error_code status = cnk_f64_dot(
+        cnk_f64_const_view_make(a->data, a->size, 1),
+        cnk_f64_const_view_make(b->data, b->size, 1), result);
+    return status == CNK_SUCCESS ? 0 : -1;
 }
 
 int cnk_vector_norm2(const cnk_vector *v, double *result) {
@@ -120,15 +115,10 @@ int cnk_vector_norm2(const cnk_vector *v, double *result) {
         return -1;
     }
 
-    double dot = 0.0;
-
-    if (cnk_vector_dot(v, v, &dot) != 0) {
-        return -1;
-    }
-
-    *result = sqrt(dot);
-    cnk_set_last_error(CNK_SUCCESS, NULL);
-    return 0;
+    /* A scaled norm avoids overflowing v dot v when the norm itself fits. */
+    cnk_error_code status = cnk_f64_norm2(
+        cnk_f64_const_view_make(v->data, v->size, 1), result);
+    return status == CNK_SUCCESS ? 0 : -1;
 }
 
 void cnk_vector_print(const cnk_vector *v) {

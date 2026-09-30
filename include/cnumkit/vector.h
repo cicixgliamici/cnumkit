@@ -9,6 +9,10 @@
 #include <stddef.h>
 #include "cnumkit_export.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Represents a mathematical column vector.
  */
@@ -76,7 +80,7 @@ CNUMKIT_EXPORT int cnk_vector_set(cnk_vector *v, size_t index, double value);
  * @param a Pointer to the first vector.
  * @param b Pointer to the second vector.
  * @param result Pointer to a double where the result will be stored.
- * @return 0 on success, or -1 on dimension mismatch or NULL pointers.
+ * @return 0 on success, or -1 on invalid input, dimension mismatch, or non-finite arithmetic.
  * @note result remains unchanged on failure.
  */
 /*@
@@ -91,7 +95,8 @@ CNUMKIT_EXPORT int cnk_vector_dot(const cnk_vector *a, const cnk_vector *b, doub
  * 
  * @param v Pointer to the vector.
  * @param result Pointer to a double where the calculated norm will be stored.
- * @return 0 on success, or -1 if v or result is invalid.
+ * @return 0 on success, or -1 if input is invalid or the norm is non-finite.
+ * @note Uses scaled sum-of-squares accumulation and leaves result unchanged on failure.
  * @note result remains unchanged on failure.
  */
 CNUMKIT_EXPORT int cnk_vector_norm2(const cnk_vector *v, double *result);
@@ -105,5 +110,9 @@ CNUMKIT_EXPORT int cnk_vector_norm2(const cnk_vector *v, double *result);
  * @note Invalid input is printed as `(null vector)` and sets CNK_ERROR_INVALID_ARGUMENT.
  */
 CNUMKIT_EXPORT void cnk_vector_print(const cnk_vector *v);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CNUMKIT_VECTOR_H */

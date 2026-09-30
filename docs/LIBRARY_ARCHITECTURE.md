@@ -4,6 +4,11 @@ This document explains the internal shape of `cnumkit`: how the library is organ
 
 ## Public Surface
 
+The additive borrowed-view API is described in `BORROWED_KERNELS.md`. Its vector
+and matrix kernels use caller-owned buffers and share layout validation.
+`adapters.h` connects owned objects to borrowed descriptors without copying.
+Legacy vector dot and norm calls delegate to the scalar kernel implementation.
+
 Users normally include:
 
 ```c
