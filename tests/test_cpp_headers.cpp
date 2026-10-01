@@ -5,6 +5,9 @@
 #include "cnumkit/matrix.h"
 #include "cnumkit/kernels.h"
 #include "cnumkit/adapters.h"
+#include "cnumkit/linalg.h"
+#include "cnumkit/optim.h"
+#include "cnumkit/ml.h"
 #include "cnumkit.h"
 
 int main() {
@@ -27,5 +30,9 @@ int main() {
         status = cnk_f64_matvec(matrix, view, cnk_f64_view_make(output, 2, 1));
     }
     cnk_matrix_free(identity);
-    return status == CNK_SUCCESS && output[0] == 3.0 && output[1] == 4.0 ? 0 : 1;
+    cnk_linear_regression_model model = {2.0, 1.0};
+    double prediction = 0.0;
+    return status == CNK_SUCCESS && output[0] == 3.0 && output[1] == 4.0
+        && cnk_ml_linear_regression_try_predict(&model, 3.0, &prediction) == 0
+        && prediction == 7.0 ? 0 : 1;
 }

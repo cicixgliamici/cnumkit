@@ -1,10 +1,12 @@
 PROJECT_NAME           = "cnumkit"
 PROJECT_NUMBER         = 0.1.0
 PROJECT_BRIEF          = "A lightweight C library for numerical analysis and machine learning."
-OUTPUT_DIRECTORY       = docs
+OUTPUT_DIRECTORY       = build/doxygen-release
 USE_MDFILE_AS_MAINPAGE = README.md
 INPUT                  = README.md \
+                         CHANGELOG.md \
                          docs/USER_GUIDE.md \
+                         docs/RELEASE_CHECKLIST.md \
                          docs/LIBRARY_ARCHITECTURE.md \
                          docs/DEVELOPMENT_GUIDE.md \
                          docs/NUMERICAL_NOTES.md \
@@ -25,3 +27,5 @@ EXTRACT_STATIC         = NO
 QUIET                  = YES
 WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
+WARN_AS_ERROR          = YES
+HAVE_DOT               = NO

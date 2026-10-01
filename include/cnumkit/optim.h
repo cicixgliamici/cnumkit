@@ -8,6 +8,10 @@
 
 #include "cnumkit_export.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Function pointer type for a generic scalar mathematical function f(x).
  */
@@ -56,5 +60,9 @@ CNUMKIT_EXPORT int cnk_optim_gradient_descent_1d(
     int iterations,
     double *result
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CNUMKIT_OPTIM_H */

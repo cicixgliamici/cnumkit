@@ -82,14 +82,20 @@ double cnk_matrix_get(const cnk_matrix *m, size_t row, size_t col) {
     CNK_REQUIRES(m != NULL);
     CNK_REQUIRES(row < m->rows && col < m->cols);
 
-    if (!m || !m->data || row >= m->rows || col >= m->cols) {
+    double value = 0.0;
+    return cnk_matrix_try_get(m, row, col, &value) == 0 ? value : 0.0;
+}
+
+int cnk_matrix_try_get(const cnk_matrix *m, size_t row, size_t col, double *result) {
+    if (!m || !m->data || !result || row >= m->rows || col >= m->cols) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Invalid matrix access");
-        return 0.0;
+        return -1;
     }
 
-    double value = m->data[cnk_matrix_index(m, row, col)];
+    /* Write only after validation so a failed read preserves the caller's value. */
+    *result = m->data[cnk_matrix_index(m, row, col)];
     cnk_set_last_error(CNK_SUCCESS, NULL);
-    return value;
+    return 0;
 }
 
 int cnk_matrix_set(cnk_matrix *m, size_t row, size_t col, double value) {

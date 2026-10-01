@@ -60,14 +60,20 @@ double cnk_vector_get(const cnk_vector *v, size_t index) {
     CNK_REQUIRES(v != NULL);
     CNK_REQUIRES(index < v->size);
 
-    if (!v || !v->data || index >= v->size) {
+    double value = 0.0;
+    return cnk_vector_try_get(v, index, &value) == 0 ? value : 0.0;
+}
+
+int cnk_vector_try_get(const cnk_vector *v, size_t index, double *result) {
+    if (!v || !v->data || !result || index >= v->size) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Invalid vector access");
-        return 0.0;
+        return -1;
     }
 
-    double value = v->data[index];
+    /* Write only after validation so a failed read preserves the caller's value. */
+    *result = v->data[index];
     cnk_set_last_error(CNK_SUCCESS, NULL);
-    return value;
+    return 0;
 }
 
 int cnk_vector_set(cnk_vector *v, size_t index, double value) {

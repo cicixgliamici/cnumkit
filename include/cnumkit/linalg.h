@@ -10,6 +10,10 @@
 #include "cnumkit/vector.h"
 #include "cnumkit_export.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Solves a system of linear equations Ax = b using Gaussian elimination.
  * 
@@ -34,5 +38,9 @@
   requires A->rows == b->size;
 */
 CNUMKIT_EXPORT cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CNUMKIT_LINALG_H */

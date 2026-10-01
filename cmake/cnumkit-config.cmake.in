@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+
+# Import the installed library target through the package entry point.
+include("${CMAKE_CURRENT_LIST_DIR}/cnumkit-targets.cmake")
+
+check_required_components(cnumkit)

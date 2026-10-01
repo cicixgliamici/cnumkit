@@ -13,8 +13,15 @@ verification and version policy are the next foundation tasks. See
 
 The 2026-09-30 scenario increment adds a sixth C suite, two runnable use cases,
 and analytic checks for optimization and ML. All six C suites pass the direct
-Linux ASan/UBSan build; CMake registration for the new targets still needs a
-fresh CMake run.
+Linux ASan/UBSan build. On 2026-10-01, clean Debug/shared and Release/static
+CMake builds each passed seven CTest cases, including C++ header verification.
+Both installed packages built and ran the separate `tests/consumer` project.
+The next packaging check is Windows consumption and remote CI evidence.
+
+The `v0.1.0` candidate now includes MIT licensing, checked scalar access and
+prediction, a changelog, and a release checklist. Local GCC CMake, sanitizer,
+external-consumer, and warning-clean Doxygen checks pass. Remote CI and Windows
+package consumption still require evidence before tagging.
 
 ## Previous Reviewer Baseline
 
@@ -50,7 +57,9 @@ Completed:
 - Successful operations, error inspection, and unchanged-on-failure outputs follow one documented policy.
 - Doxygen comments, implementation behavior, and regression tests are aligned.
 
-Deferred pre-1.0 decision: evaluate status-returning alternatives for scalar getters and prediction, whose `0.0` failure value is inherently ambiguous.
+Status-returning alternatives for scalar getters and prediction are now
+available while the original value-returning calls remain for compatibility.
+Public owned-object structures remain visible for the `0.1.x` educational API.
 
 ## Phase 3: Numerical And Negative Testing
 
@@ -72,21 +81,22 @@ Status: **in progress**.
 
 - Keep the README short and oriented toward scope, build, tests, and first use.
 - Maintain separate user, architecture, numerical, development, status, roadmap, and RISC-V documents.
-- Generate Doxygen and resolve warnings for all public API declarations.
-- Add an automated documentation check after local generation is clean.
+- Doxygen generates locally with warnings treated as errors; the CI check is
+  configured and awaits its first remote run.
 - Keep public claims tied to executed evidence.
 
 Completion criterion: a new contributor can navigate the project from the README, and Doxygen generates without critical warnings.
 
 ## Phase 5: Packaging And External Consumption
 
-Status: **partial**.
+Status: **advanced partial**.
 
-- Generate and install `cnumkit-config.cmake` and a version file.
-- Verify static and shared installation layouts.
-- Build a separate consumer using only `find_package(cnumkit REQUIRED)` and `cnumkit::cnumkit`.
-- Confirm generated export headers and Windows symbol visibility.
-- Define the public changelog and minimum criteria for a `v0.1.0` tag.
+- Completed on Linux: generate and install `cnumkit-config.cmake` and a version
+  file, verify static and shared installations, and run a separate consumer using
+  `find_package(cnumkit 0.1 CONFIG REQUIRED)` and `cnumkit::cnumkit`.
+- Confirm generated export headers and shared-library symbol visibility on Windows.
+- The changelog and `docs/RELEASE_CHECKLIST.md` define minimum tag criteria;
+  remote CI and Windows consumption remain open.
 
 Completion criterion: a clean external project can find, include, link, and run against an installed `cnumkit` package.
 

@@ -35,13 +35,29 @@ The development strategy is deliberately scalar-first: establish a small, trustw
 
 ## Verified Baseline
 
+On 2026-10-01, the `v0.1.0` candidate added status-returning scalar getters and
+prediction, an MIT license, release notes, and Windows consumer and Doxygen CI
+steps. Clean GCC 13.3 Debug/shared and Release/static CMake builds each passed
+7 of 7 CTest cases, including the C++ header smoke test. All six C suites passed
+ASan and UBSan with 3,142 assertions total. Both installed packages built and
+ran the external consumer, which also calls the new prediction API. Doxygen
+1.9.8 generated documentation with warnings treated as errors. Remote CI and
+Windows package consumption are still pending.
+
+On 2026-10-01, clean Ubuntu/WSL GCC 13.3 CMake builds passed with warnings as
+errors in Debug/shared and Release/static configurations. Each passed 7 of 7
+CTest cases, including the optional C++ header smoke test and the new scenario
+suite. Both configurations installed successfully. A separate consumer project
+used only `find_package(cnumkit 0.1 CONFIG REQUIRED)`, the installed headers,
+and `cnumkit::cnumkit`; both executables printed `[7.0, 1.0]` and a norm of
+`7.071068`. The new CI consumer steps are configured but have not been run
+remotely. Windows package consumption remains unverified.
+
 On 2026-09-30, the six C suites passed a direct strict GCC 13.3 build on
 Ubuntu/WSL with ASan and UBSan: 3,114 assertions passed, 0 failed. This includes
 the new mathematical scenario suite and additional optimization and ML cases.
 The new `sensor_calibration` and `thermal_network` examples also compiled with
-strict warnings and produced their documented outputs. CMake registration for
-the new targets has not yet been rerun in this environment because CMake is not
-installed in WSL.
+strict warnings and produced their documented outputs.
 
 The previous CMake verification was performed on 2026-09-29 with MinGW GCC/G++
 15.1.0, CMake, and Ninja, plus Ubuntu/WSL GCC 13.3.0:
@@ -74,17 +90,14 @@ It is not production-ready. The following evidence is still missing:
 
 - A completed remote CI run across GCC, Clang, and MSVC.
 - Coverage reports and sanitizer coverage on additional compilers/platforms.
-- Warning-free generated Doxygen output.
-- A complete installed CMake package usable through `find_package`.
-- Verification from a clean external consumer project.
+- Installed-package verification on Windows, including shared-library symbol visibility.
 - RISC-V cross-build and QEMU test results.
 - Scalar performance baselines.
 - Condition-number-aware validation against an established numerical reference.
 
 ## Pre-1.0 Design Decisions Still Open
 
-- Whether scalar getters and prediction should move to status-returning output-pointer APIs.
-- Whether vector and matrix structures should become opaque.
+- Whether vector and matrix structures should become opaque in a later minor version.
 - The exact reusable LU factorization interface and workspace/allocator policy.
 - How optional optimized backends should be selected without changing the public API.
 

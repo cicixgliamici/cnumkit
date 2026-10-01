@@ -18,7 +18,17 @@ An in-tree CMake target links with:
 target_link_libraries(my_program PRIVATE cnumkit::cnumkit)
 ```
 
-The installed `find_package` workflow is planned but not yet complete. See `docs/PROJECT_STATUS.md` before depending on installation behavior.
+An installed package can be consumed with:
+
+```cmake
+find_package(cnumkit 0.1 CONFIG REQUIRED)
+target_link_libraries(my_program PRIVATE cnumkit::cnumkit)
+```
+
+Point `CMAKE_PREFIX_PATH` at the installation prefix when CMake cannot find it
+automatically. The repository's `tests/consumer` project is a minimal example
+that uses only the installed headers and target. Package version compatibility
+is limited to the current `0.1.x` line while the API is pre-1.0.
 
 ## Data Ownership
 
@@ -63,6 +73,12 @@ Error categories:
 - `CNK_ERROR_MATH`: non-finite stored values, divergence, overflow, or non-finite results.
 
 `cnk_vector_get`, `cnk_matrix_get`, and `cnk_ml_linear_regression_predict` return `0.0` on failure. Because zero is also valid, inspect `cnk_get_last_error()` immediately when the distinction matters.
+
+For new code, the corresponding `cnk_vector_try_get`, `cnk_matrix_try_get`,
+and `cnk_ml_linear_regression_try_predict` functions return `0` on success and
+write through an output pointer. On failure they return `-1`, set the error
+state, and leave the output unchanged. The value-returning forms remain for
+compatibility within the `0.1.x` line.
 
 ## Vector And Matrix Use
 

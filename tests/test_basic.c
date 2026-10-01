@@ -76,6 +76,42 @@ static void test_vector_norm2(void) {
     cnk_vector_free(v);
 }
 
+static void test_checked_scalar_access(void) {
+    cnk_vector *vector = cnk_vector_create(2);
+    cnk_matrix *matrix = cnk_matrix_create(1, 2);
+    EXPECT_NOT_NULL(vector);
+    EXPECT_NOT_NULL(matrix);
+    if (!vector || !matrix) {
+        cnk_vector_free(vector);
+        cnk_matrix_free(matrix);
+        return;
+    }
+
+    double value = 7.0;
+    /* A valid zero must be distinguishable from an invalid access. */
+    EXPECT_TRUE(cnk_vector_try_get(vector, 0, &value) == 0);
+    EXPECT_TRUE(value == 0.0);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_SUCCESS);
+    value = 7.0;
+    EXPECT_TRUE(cnk_vector_try_get(vector, 2, &value) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(value == 7.0);
+    EXPECT_TRUE(cnk_vector_try_get(vector, 0, NULL) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    EXPECT_TRUE(cnk_matrix_try_get(matrix, 0, 0, &value) == 0);
+    EXPECT_TRUE(value == 0.0);
+    value = 9.0;
+    EXPECT_TRUE(cnk_matrix_try_get(matrix, 1, 0, &value) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(value == 9.0);
+    EXPECT_TRUE(cnk_matrix_try_get(matrix, 0, 0, NULL) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+
+    cnk_vector_free(vector);
+    cnk_matrix_free(matrix);
+}
+
 static void test_matrix_multiply(void) {
     cnk_matrix *A = cnk_matrix_create(2, 2);
     cnk_matrix *B = cnk_matrix_create(2, 2);
@@ -387,6 +423,7 @@ static void test_non_finite_linear_system(void) {
 TEST_SUITE("Basic Operations and Error Handling")
     RUN_TEST(test_vector_dot);
     RUN_TEST(test_vector_norm2);
+    RUN_TEST(test_checked_scalar_access);
     RUN_TEST(test_matrix_multiply);
     RUN_TEST(test_gaussian_solve);
     RUN_TEST(test_error_handling);

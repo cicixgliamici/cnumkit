@@ -170,10 +170,31 @@ static void test_prediction_and_mse_with_known_residuals(void) {
     cnk_vector_free(observations);
 }
 
+static void test_checked_prediction(void) {
+    cnk_linear_regression_model model = {2.0, -2.0};
+    double result = 17.0;
+
+    /* A successful zero prediction must not look like an error. */
+    EXPECT_TRUE(cnk_ml_linear_regression_try_predict(&model, 1.0, &result) == 0);
+    EXPECT_TRUE(result == 0.0);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_SUCCESS);
+    result = 17.0;
+    EXPECT_TRUE(cnk_ml_linear_regression_try_predict(NULL, 1.0, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(result == 17.0);
+    EXPECT_TRUE(cnk_ml_linear_regression_try_predict(&model, 1.0, NULL) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    model.weight = DBL_MAX;
+    EXPECT_TRUE(cnk_ml_linear_regression_try_predict(&model, 2.0, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_MATH);
+    EXPECT_TRUE(result == 17.0);
+}
+
 TEST_SUITE("Machine Learning")
     RUN_TEST(test_linear_regression_fit);
     RUN_TEST(test_linear_regression_invalid_arguments);
     RUN_TEST(test_ml_nan_inf);
     RUN_TEST(test_ml_scaled_data_and_overflow);
     RUN_TEST(test_prediction_and_mse_with_known_residuals);
+    RUN_TEST(test_checked_prediction);
 TEST_SUITE_END()

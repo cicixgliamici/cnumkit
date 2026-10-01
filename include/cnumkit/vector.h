@@ -62,6 +62,15 @@ CNUMKIT_EXPORT void cnk_vector_free(cnk_vector *v);
 CNUMKIT_EXPORT double cnk_vector_get(const cnk_vector *v, size_t index);
 
 /**
+ * @brief Reads one element without using a sentinel value for errors.
+ * @param v Pointer to the vector.
+ * @param index The 0-based index of the element.
+ * @param result Receives the value on success and remains unchanged on failure.
+ * @return 0 on success, or -1 for an invalid vector, index, or result pointer.
+ */
+CNUMKIT_EXPORT int cnk_vector_try_get(const cnk_vector *v, size_t index, double *result);
+
+/**
  * @brief Sets the value at a specific index in the vector.
  * 
  * @param v Pointer to the vector.

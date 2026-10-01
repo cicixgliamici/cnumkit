@@ -159,6 +159,20 @@ endif()
 # -----------------
 # Installation
 # -----------------
+# Generate relocatable package metadata for external CMake consumers.
+include(CMakePackageConfigHelpers)
+set(cnumkit_package_dir ${CMAKE_INSTALL_LIBDIR}/cmake/cnumkit)
+configure_package_config_file(
+    cmake/cnumkit-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/cnumkit-config.cmake
+    INSTALL_DESTINATION ${cnumkit_package_dir}
+)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/cnumkit-config-version.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMinorVersion
+)
+
 install(TARGETS cnumkit
     EXPORT cnumkit-targets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -168,6 +182,7 @@ install(TARGETS cnumkit
 
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    PATTERN "cnumkit_export.h" EXCLUDE
 )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/cnumkit_export.h
@@ -177,5 +192,16 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/cnumkit_export.h
 install(EXPORT cnumkit-targets
     FILE cnumkit-targets.cmake
     NAMESPACE cnumkit::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cnumkit
+    DESTINATION ${cnumkit_package_dir}
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/cnumkit-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/cnumkit-config-version.cmake
+    DESTINATION ${cnumkit_package_dir}
+)
+
+# Ship the legal terms and release notes with binary installations too.
+install(FILES LICENSE CHANGELOG.md
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/cnumkit
 )

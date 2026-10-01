@@ -3,7 +3,19 @@
 #include <stdio.h>
 
 int main(void) {
-    /* Steady temperatures between boundaries at 30 and 0 degrees. */
+    /*
+     * Simulate two interior nodes in a one-dimensional thermal network.
+     * Adjacent nodes have equal conductance, while the end temperatures are
+     * fixed at 30 and 0 degrees. At steady state, inflow equals outflow:
+     *
+     * 2*T1 - T2 = 30
+     * -T1 + 2*T2 = 0
+     *
+     * The coefficient matrix and boundary vector below encode these equations.
+     * Gaussian elimination gives T1 = 20 and T2 = 10 degrees, so the
+     * temperature drops by 10 degrees across each of the three connections.
+     * No material units or transient behavior are modeled here.
+     */
     const double coefficients[] = {2.0, -1.0, -1.0, 2.0};
     const double boundary[] = {30.0, 0.0};
     cnk_matrix *system = cnk_matrix_create(2, 2);

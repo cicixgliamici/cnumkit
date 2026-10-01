@@ -2,6 +2,10 @@
 
 `cnumkit` is a small educational C11 scientific-computing library. It demonstrates predictable APIs, explicit ownership and error handling, numerical reasoning, strict tests, and portable build practices. It is a scalar reference project, not a replacement for production libraries such as BLAS or LAPACK.
 
+The project is licensed under MIT. The first public `v0.1.0` release is being
+prepared; see `CHANGELOG.md` and `docs/RELEASE_CHECKLIST.md` for its scope and
+remaining verification.
+
 ## Current Modules
 
 - Borrowed `f64` vector/matrix views, scalar kernels, and owned-object adapters.
@@ -21,6 +25,11 @@ Public functions validate runtime inputs and report failures through return valu
 - Non-finite numerical results set `CNK_ERROR_MATH`.
 
 Runtime contract checks are available as an opt-in development aid with `CNUMKIT_ENABLE_CONTRACTS=ON`. They are not required for normal API safety checks.
+
+For scalar reads and predictions, prefer `cnk_vector_try_get`,
+`cnk_matrix_try_get`, and `cnk_ml_linear_regression_try_predict` when a valid
+zero must be distinguished from an error. They return `0` on success and leave
+the output unchanged on failure.
 
 ## Build And Test
 
@@ -49,6 +58,20 @@ ctest --test-dir build-strict -C Debug --output-on-failure
 GitHub Actions is configured to repeat strict Debug and Release builds with GCC, Clang, and MSVC. The matrix covers static and shared libraries, opt-in contracts, and a Clang sanitizer build.
 
 Contract-enabled builds are compiled separately because contracts intentionally abort on violated preconditions, while the current negative tests verify recoverable runtime error handling in-process. Dedicated contract death tests are planned before contract-enabled CTest execution is enabled.
+
+## Installed CMake Package
+
+Install to a local prefix, then build the separate consumer project against it:
+
+```bash
+cmake --install build --prefix build/install
+cmake -S tests/consumer -B build/consumer -DCMAKE_PREFIX_PATH=/absolute/path/to/build/install
+cmake --build build/consumer
+```
+
+The consumer calls `find_package(cnumkit 0.1 CONFIG REQUIRED)` and links
+`cnumkit::cnumkit`. The package includes a version file with `0.1.x`
+compatibility. See `docs/USER_GUIDE.md` for the public API conventions.
 
 ## Minimal Example
 

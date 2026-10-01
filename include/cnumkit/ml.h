@@ -10,6 +10,10 @@
 #include "cnumkit/vector.h"
 #include "cnumkit_export.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Represents a simple 1D linear regression model.
  * 
@@ -32,6 +36,16 @@ CNUMKIT_EXPORT double cnk_ml_linear_regression_predict(
     const cnk_linear_regression_model *model,
     double x
 );
+
+/**
+ * @brief Predicts a value and reports failure without an ambiguous zero result.
+ * @param model Pointer to a finite linear regression model.
+ * @param x Finite input feature value.
+ * @param result Receives the prediction on success and remains unchanged on failure.
+ * @return 0 on success, or -1 for invalid input or non-finite arithmetic.
+ */
+CNUMKIT_EXPORT int cnk_ml_linear_regression_try_predict(
+    const cnk_linear_regression_model *model, double x, double *result);
 
 /**
  * @brief Fits a 1D linear regression model to a dataset using gradient descent.
@@ -73,5 +87,9 @@ CNUMKIT_EXPORT int cnk_ml_mean_squared_error(
     const cnk_linear_regression_model *model,
     double *result
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CNUMKIT_ML_H */

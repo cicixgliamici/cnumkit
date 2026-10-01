@@ -64,6 +64,17 @@ CNUMKIT_EXPORT void cnk_matrix_free(cnk_matrix *m);
 CNUMKIT_EXPORT double cnk_matrix_get(const cnk_matrix *m, size_t row, size_t col);
 
 /**
+ * @brief Reads one element without using a sentinel value for errors.
+ * @param m Pointer to the matrix.
+ * @param row The 0-based row index.
+ * @param col The 0-based column index.
+ * @param result Receives the value on success and remains unchanged on failure.
+ * @return 0 on success, or -1 for invalid input or an out-of-bounds index.
+ */
+CNUMKIT_EXPORT int cnk_matrix_try_get(
+    const cnk_matrix *m, size_t row, size_t col, double *result);
+
+/**
  * @brief Sets the value at a specific row and column in the matrix.
  * 
  * @param m Pointer to the matrix.

@@ -7,19 +7,30 @@ double cnk_ml_linear_regression_predict(
     const cnk_linear_regression_model *model,
     double x
 ) {
-    if (!model || !isfinite(x) || !isfinite(model->weight) || !isfinite(model->bias)) {
+    double prediction = 0.0;
+    return cnk_ml_linear_regression_try_predict(model, x, &prediction) == 0
+        ? prediction : 0.0;
+}
+
+int cnk_ml_linear_regression_try_predict(
+    const cnk_linear_regression_model *model, double x, double *result
+) {
+    if (!model || !result || !isfinite(x)
+        || !isfinite(model->weight) || !isfinite(model->bias)) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Prediction inputs and model parameters must be finite");
-        return 0.0;
+        return -1;
     }
 
     double prediction = model->weight * x + model->bias;
     if (!isfinite(prediction)) {
         cnk_set_last_error(CNK_ERROR_MATH, "Linear regression prediction produced a non-finite result");
-        return 0.0;
+        return -1;
     }
 
+    /* Preserve the caller's output if either validation or arithmetic fails. */
+    *result = prediction;
     cnk_set_last_error(CNK_SUCCESS, NULL);
-    return prediction;
+    return 0;
 }
 
 int cnk_ml_linear_regression_fit(

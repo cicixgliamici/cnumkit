@@ -4,7 +4,13 @@
 #include <string.h>
 
 static void test_sensor_calibration_pipeline(void) {
-    /* Interleaved channels include padding that must not enter the calculation. */
+    /*
+     * Model three interleaved sensor readings: [2, -1, 2]. The 99 slots are
+     * metadata, so a stride-two view must skip them. Adding the baseline
+     * [-1, 0, 1] gives [1, -1, 3]. The two calibration rows produce
+     * 1 - 1 = 0 and -1 - 3 = -4. Dotting the result with itself gives 16;
+     * its Euclidean norm is 4. Check the metadata to catch accidental writes.
+     */
     double samples[] = {2.0, 99.0, -1.0, 99.0, 2.0};
     double baseline[] = {-1.0, 0.0, 1.0};
     double corrected[] = {0.0, 0.0, 0.0};
@@ -34,7 +40,12 @@ static void test_sensor_calibration_pipeline(void) {
 }
 
 static void test_matrix_product_and_identity(void) {
-    /* A is 2x3 and B is 3x2, so this also checks rectangular indexing. */
+    /*
+     * Multiply a 2x3 transformation by a 3x2 transformation. For example,
+     * the upper-left entry is 1*2 + (-2)*(-1) + 3*4 = 16. The remaining
+     * expected entries are [-5, -8, 12]. Multiplication by the 2x2 identity
+     * must preserve the entire result and checks a second matrix operation.
+     */
     double left[] = {1.0, -2.0, 3.0, 0.0, 4.0, -1.0};
     double right[] = {2.0, 1.0, -1.0, 3.0, 4.0, 0.0};
     double product[4] = {0.0};
@@ -68,7 +79,11 @@ static void test_owned_objects_and_borrowed_views_agree(void) {
         return;
     }
 
-    /* The known solution [2, -1] also requires a row swap at the first pivot. */
+    /*
+     * Solve 2*y = -2 and 3*x + y = 5, whose solution is [2, -1].
+     * The zero leading coefficient forces a row swap. Reconstructing A*x
+     * with a borrowed matvec checks both the solve and adapter path.
+     */
     const double coefficients[] = {0.0, 2.0, 3.0, 1.0};
     for (size_t row = 0; row < 2; ++row) {
         for (size_t column = 0; column < 2; ++column) {

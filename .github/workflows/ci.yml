@@ -8,6 +8,19 @@ permissions:
   contents: read
 
 jobs:
+  documentation:
+    name: Doxygen / public API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Install Doxygen
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends doxygen
+
+      - name: Generate documentation
+        run: doxygen Doxyfile
+
   linux:
     name: Linux / ${{ matrix.compiler }} / ${{ matrix.build_type }} / ${{ matrix.linkage }}
     runs-on: ubuntu-latest
@@ -59,6 +72,22 @@ jobs:
         if: matrix.run_tests
         run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
 
+      - name: Install package
+        if: matrix.run_tests && matrix.sanitizers == 'OFF'
+        run: cmake --install build --config ${{ matrix.build_type }} --prefix "$PWD/build/package"
+
+      - name: Configure external consumer
+        if: matrix.run_tests && matrix.sanitizers == 'OFF'
+        run: cmake -S tests/consumer -B build/consumer -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH="$PWD/build/package"
+
+      - name: Build external consumer
+        if: matrix.run_tests && matrix.sanitizers == 'OFF'
+        run: cmake --build build/consumer --parallel
+
+      - name: Run external consumer
+        if: matrix.run_tests && matrix.sanitizers == 'OFF'
+        run: ./build/consumer/cnumkit_external_consumer
+
   windows:
     name: Windows / MSVC / ${{ matrix.build_type }} / ${{ matrix.linkage }}
     runs-on: windows-latest
@@ -86,3 +115,18 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
+
+      - name: Install package
+        run: cmake --install build --config ${{ matrix.build_type }} --prefix "$pwd/build/package"
+
+      - name: Configure external consumer
+        run: cmake -S tests/consumer -B consumer -DCMAKE_PREFIX_PATH="$pwd/build/package"
+
+      - name: Build external consumer
+        run: cmake --build consumer --config ${{ matrix.build_type }} --parallel
+
+      - name: Run external consumer
+        run: |
+          # The shared build needs the installed DLL on the process search path.
+          $env:PATH = "$pwd/build/package/bin;$env:PATH"
+          & "./consumer/${{ matrix.build_type }}/cnumkit_external_consumer.exe"
