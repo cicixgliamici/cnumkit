@@ -28,4 +28,6 @@ checkout is not a release merely because its CMake project version is `0.1.0`.
 - [x] Review `git diff`, commit the candidate, and confirm a clean worktree.
 - [ ] Record the commit hash, compiler versions, and CI run links in the release notes.
 - [ ] Change the changelog heading from "Unreleased" to the release date.
-- [ ] Create and publish `v0.1.0` only after the verification items pass.
+- [ ] Create and push annotated `v0.1.0` only after the candidate CI passes.
+- [ ] Confirm the tag workflow passes and publishes four installable archives
+  plus GitHub's source archives as a GitHub Release.

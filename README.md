@@ -6,6 +6,10 @@ The project is licensed under MIT. The first public `v0.1.0` release is being
 prepared; see `CHANGELOG.md` and `docs/RELEASE_CHECKLIST.md` for its scope and
 remaining verification.
 
+For releases, a tagged `vX.Y.Z` commit must match the CMake project version.
+The tag CI runs the test matrix, packages installed Linux and Windows builds,
+and publishes the GitHub Release only after all jobs succeed.
+
 ## Current Modules
 
 - Borrowed `f64` vector/matrix views, scalar kernels, and owned-object adapters.
