@@ -7,6 +7,7 @@ INPUT                  = README.md \
                          CHANGELOG.md \
                          docs/USER_GUIDE.md \
                          docs/RELEASE_CHECKLIST.md \
+                         docs/PACKAGING.md \
                          docs/LIBRARY_ARCHITECTURE.md \
                          docs/DEVELOPMENT_GUIDE.md \
                          docs/NUMERICAL_NOTES.md \

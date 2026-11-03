@@ -201,7 +201,13 @@ install(FILES
     DESTINATION ${cnumkit_package_dir}
 )
 
-# Ship the legal terms and release notes with binary installations too.
+# Keep offline usage instructions beside the legal terms in binary packages.
 install(FILES LICENSE CHANGELOG.md
+    README.md
+    docs/USER_GUIDE.md
+    docs/BORROWED_KERNELS.md
+    docs/NUMERICAL_NOTES.md
+    docs/PACKAGING.md
+    docs/RELEASE_NOTES.md
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/cnumkit
 )

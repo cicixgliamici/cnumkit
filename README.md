@@ -75,7 +75,9 @@ cmake --build build/consumer
 
 The consumer calls `find_package(cnumkit 0.1 CONFIG REQUIRED)` and links
 `cnumkit::cnumkit`. The package includes a version file with `0.1.x`
-compatibility. See `docs/USER_GUIDE.md` for the public API conventions.
+compatibility. See [packaging instructions](docs/PACKAGING.md) for binary archive
+selection, checksums, relocation checks, and Windows DLL setup, and
+`docs/USER_GUIDE.md` for the public API conventions.
 
 ## Minimal Example
 
@@ -134,6 +136,8 @@ RISC-V support starts with cross-compilation and smoke tests against the scalar 
 
 ## Documentation
 
+- [Packaging and release delivery](docs/PACKAGING.md): install trees, binary assets, and verification.
+- [Release checklist](docs/RELEASE_CHECKLIST.md): evidence required before tagging.
 - `docs/BORROWED_KERNELS.md`: zero-copy layouts, aliasing, kernel errors, and examples.
 - `docs/USER_GUIDE.md`: normal use, ownership, and failure handling.
 - `docs/LIBRARY_ARCHITECTURE.md`: internal modules and data flow.

@@ -1,6 +1,8 @@
 # Project Status
 
-This document is the current, evidence-based snapshot of `cnumkit`. Historical work and previous test counts remain recorded in `local/LOCAL_CHANGELOG.md`.
+This document is the current, evidence-based snapshot of `cnumkit`. Dated
+baselines below preserve the public verification history; additional maintainer
+notes may exist in the ignored `local/LOCAL_CHANGELOG.md`.
 
 ## Project Goal
 
@@ -34,6 +36,22 @@ The development strategy is deliberately scalar-first: establish a small, trustw
 - Scalar getters return `0.0` on failure; callers must inspect the error state when zero is ambiguous.
 
 ## Verified Baseline
+
+On 2026-11-03, the documentation and packaging increment passed clean
+Ubuntu/WSL builds with GCC/G++ 13.3.0 and CMake 3.28.3, with warnings treated as
+errors. Debug/shared and Release/static each passed all 7 CTest cases. Both
+install trees were archived, their original prefixes moved aside, and the
+archives extracted at new prefixes. Each external consumer then configured,
+built, and passed its CTest case using the extracted package. Archive SHA-256
+checks passed, and the installed license and packaging guide were present.
+Doxygen 1.9.8 generated documentation with warnings treated as errors.
+
+The CI workflow now performs archive relocation checks on Linux and Windows,
+enables the C++ header smoke test explicitly, and publishes `SHA256SUMS` with
+release assets. These workflow changes have not been verified remotely. Clang
+is unavailable in this local environment, so the updated Clang/C++ sanitizer
+configuration and Windows/MSVC package consumption still await remote evidence.
+No tag or public release was created by this increment.
 
 On 2026-10-01, the `v0.1.0` candidate added status-returning scalar getters and
 prediction, an MIT license, release notes, and Windows consumer and Doxygen CI

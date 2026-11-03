@@ -58,12 +58,14 @@ jobs:
             run_tests: false
     env:
       CC: ${{ matrix.compiler }}
+      # Keep the C++ smoke test on the same sanitizer runtime as the C library.
+      CXX: ${{ matrix.compiler == 'clang' && 'clang++' || 'g++' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DCNUMKIT_ENABLE_CONTRACTS=${{ matrix.contracts }} -DCNUMKIT_ENABLE_SANITIZERS=${{ matrix.sanitizers }} -DCNUMKIT_WARNINGS_AS_ERRORS=ON
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DCNUMKIT_ENABLE_CONTRACTS=${{ matrix.contracts }} -DCNUMKIT_ENABLE_SANITIZERS=${{ matrix.sanitizers }} -DCNUMKIT_WARNINGS_AS_ERRORS=ON -DCNUMKIT_BUILD_CPP_SMOKE_TEST=ON
 
       - name: Build
         run: cmake --build build --config ${{ matrix.build_type }} --parallel
@@ -76,9 +78,18 @@ jobs:
         if: matrix.run_tests && matrix.sanitizers == 'OFF'
         run: cmake --install build --config ${{ matrix.build_type }} --prefix "$PWD/build/package"
 
+      - name: Archive and relocate installed Linux package
+        if: matrix.run_tests && matrix.sanitizers == 'OFF'
+        run: |
+          tar -C build/package -czf cnumkit-linux-${{ matrix.linkage }}.tar.gz .
+          # Hide the installation prefix so absolute paths cannot mask defects.
+          mv build/package build/original-package
+          mkdir build/relocated
+          tar -C build/relocated -xzf cnumkit-linux-${{ matrix.linkage }}.tar.gz
+
       - name: Configure external consumer
         if: matrix.run_tests && matrix.sanitizers == 'OFF'
-        run: cmake -S tests/consumer -B build/consumer -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH="$PWD/build/package"
+        run: cmake -S tests/consumer -B build/consumer -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH="$PWD/build/relocated"
 
       - name: Build external consumer
         if: matrix.run_tests && matrix.sanitizers == 'OFF'
@@ -86,11 +97,7 @@ jobs:
 
       - name: Run external consumer
         if: matrix.run_tests && matrix.sanitizers == 'OFF'
-        run: ./build/consumer/cnumkit_external_consumer
-
-      - name: Archive installed Linux package
-        if: matrix.run_tests && matrix.sanitizers == 'OFF'
-        run: tar -C build/package -czf cnumkit-linux-${{ matrix.linkage }}.tar.gz .
+        run: ctest --test-dir build/consumer --output-on-failure
 
       - name: Upload Linux package
         if: matrix.run_tests && matrix.sanitizers == 'OFF'
@@ -120,7 +127,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Configure
-        run: cmake -S . -B build -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DCNUMKIT_ENABLE_CONTRACTS=${{ matrix.contracts }} -DCNUMKIT_WARNINGS_AS_ERRORS=ON
+        run: cmake -S . -B build -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DCNUMKIT_ENABLE_CONTRACTS=${{ matrix.contracts }} -DCNUMKIT_WARNINGS_AS_ERRORS=ON -DCNUMKIT_BUILD_CPP_SMOKE_TEST=ON
 
       - name: Build
         run: cmake --build build --config ${{ matrix.build_type }} --parallel
@@ -131,8 +138,15 @@ jobs:
       - name: Install package
         run: cmake --install build --config ${{ matrix.build_type }} --prefix "$pwd/build/package"
 
+      - name: Archive and relocate installed Windows package
+        run: |
+          Compress-Archive -Path build/package/* -DestinationPath cnumkit-windows-${{ matrix.linkage }}.zip
+          # Test the archive with the original installation prefix unavailable.
+          Move-Item -LiteralPath build/package -Destination build/original-package
+          Expand-Archive -LiteralPath cnumkit-windows-${{ matrix.linkage }}.zip -DestinationPath build/relocated
+
       - name: Configure external consumer
-        run: cmake -S tests/consumer -B consumer -DCMAKE_PREFIX_PATH="$pwd/build/package"
+        run: cmake -S tests/consumer -B consumer -DCMAKE_PREFIX_PATH="$pwd/build/relocated"
 
       - name: Build external consumer
         run: cmake --build consumer --config ${{ matrix.build_type }} --parallel
@@ -140,11 +154,8 @@ jobs:
       - name: Run external consumer
         run: |
           # The shared build needs the installed DLL on the process search path.
-          $env:PATH = "$pwd/build/package/bin;$env:PATH"
-          & "./consumer/${{ matrix.build_type }}/cnumkit_external_consumer.exe"
-
-      - name: Archive installed Windows package
-        run: Compress-Archive -Path build/package/* -DestinationPath cnumkit-windows-${{ matrix.linkage }}.zip
+          $env:PATH = "$pwd/build/relocated/bin;$env:PATH"
+          ctest --test-dir consumer -C ${{ matrix.build_type }} --output-on-failure
 
       - name: Upload Windows package
         uses: actions/upload-artifact@v7
@@ -182,7 +193,8 @@ jobs:
           test -f dist/cnumkit-linux-static.tar.gz
           test -f dist/cnumkit-windows-shared.zip
           test -f dist/cnumkit-windows-static.zip
-          sha256sum dist/*
+          # Publish checksums so downloaded archives can be verified offline.
+          (cd dist && sha256sum *.tar.gz *.zip > SHA256SUMS && sha256sum -c SHA256SUMS)
 
       - name: Publish GitHub Release
         env:

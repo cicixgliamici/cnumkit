@@ -15,6 +15,10 @@ First public release candidate of the scalar C11 library.
 - CMake package metadata for `find_package(cnumkit 0.1 CONFIG REQUIRED)`, with
   static and shared library installation and a separate consumer example.
 - Numerical, error-path, C++ header, sanitizer, and simulated-use tests.
+- Offline usage documentation in installed packages and a binary packaging
+  guide covering archive selection, checksums, CMake consumption, and DLL setup.
+- CI verification of consumers against extracted, relocated Linux and Windows
+  archives, explicit C++ header checks, and release asset `SHA256SUMS` generation.
 
 ### Known limits
 

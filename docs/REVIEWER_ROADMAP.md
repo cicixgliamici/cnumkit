@@ -4,24 +4,18 @@ This roadmap orders the remaining work by reviewer value. The goal is not to max
 
 ## Current Priority
 
-The 2026-09-29 borrowed-kernel increment adds scalar copy, robust norm, matrix
-products, owned-object adapters, and direct C++ header verification. Strict
-Debug/shared and Release/static configurations pass six CTest cases, and local
-Linux ASan/UBSan execution passes all five C suites. Installed-package consumer
-verification and version policy are the next foundation tasks. See
-`PROJECT_STATUS.md` and `BORROWED_KERNELS.md` for current evidence and limits.
+Finish the existing release-candidate documentation and packaging increment
+before expanding the scalar API. The `v0.1.0` candidate includes MIT licensing,
+checked scalar access and prediction, a changelog, and a release checklist.
+Local GCC CMake, sanitizer, external-consumer, and warning-clean Doxygen checks
+have established the scalar baseline; see `PROJECT_STATUS.md` for dated evidence.
 
-The 2026-09-30 scenario increment adds a sixth C suite, two runnable use cases,
-and analytic checks for optimization and ML. All six C suites pass the direct
-Linux ASan/UBSan build. On 2026-10-01, clean Debug/shared and Release/static
-CMake builds each passed seven CTest cases, including C++ header verification.
-Both installed packages built and ran the separate `tests/consumer` project.
-The next packaging check is Windows consumption and remote CI evidence.
-
-The `v0.1.0` candidate now includes MIT licensing, checked scalar access and
-prediction, a changelog, and a release checklist. Local GCC CMake, sanitizer,
-external-consumer, and warning-clean Doxygen checks pass. Remote CI and Windows
-package consumption still require evidence before tagging.
+The packaging increment adds offline usage documentation, a binary-package
+guide, archive relocation checks in CI, explicit C++ smoke-test execution, and
+published asset checksums. See `PACKAGING.md` for consumption and delivery.
+Remote CI, Windows consumption, and final verification on the release commit
+remain tag gates in `RELEASE_CHECKLIST.md`. Coverage, benchmarks, and RISC-V work
+are later increments rather than requirements for completing this local change.
 
 ## Previous Reviewer Baseline
 
@@ -34,7 +28,8 @@ Status: **advanced partial**.
 Completed locally:
 
 - Strict Debug shared and Release static CMake builds.
-- CTest registration and successful execution of all three suites.
+- CTest registration and successful local execution of six C suites and the
+  optional C++ header smoke test.
 - A contracts-enabled build.
 - A GitHub Actions matrix covering GCC, Clang, MSVC, static/shared linkage, contracts, and sanitizers.
 
@@ -84,6 +79,8 @@ Status: **in progress**.
 - Doxygen generates locally with warnings treated as errors; the CI check is
   configured and awaits its first remote run.
 - Keep public claims tied to executed evidence.
+- Include offline usage guidance in packages and document binary selection,
+  checksums, and the release procedure in `PACKAGING.md`.
 
 Completion criterion: a new contributor can navigate the project from the README, and Doxygen generates without critical warnings.
 
@@ -95,6 +92,8 @@ Status: **advanced partial**.
   file, verify static and shared installations, and run a separate consumer using
   `find_package(cnumkit 0.1 CONFIG REQUIRED)` and `cnumkit::cnumkit`.
 - Confirm generated export headers and shared-library symbol visibility on Windows.
+- CI consumes archives extracted at a new prefix with the original installation
+  prefix unavailable; record the remote result before marking it verified.
 - The changelog and `docs/RELEASE_CHECKLIST.md` define minimum tag criteria;
   remote CI and Windows consumption remain open.
 

@@ -11,3 +11,7 @@ find_package(cnumkit 0.1 CONFIG REQUIRED)
 
 add_executable(cnumkit_external_consumer main.c)
 target_link_libraries(cnumkit_external_consumer PRIVATE cnumkit::cnumkit)
+
+# CTest selects the executable location for single- and multi-config generators.
+enable_testing()
+add_test(NAME installed_package COMMAND cnumkit_external_consumer)
