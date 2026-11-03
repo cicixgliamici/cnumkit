@@ -126,6 +126,19 @@ if(CNUMKIT_BUILD_TESTS AND BUILD_TESTING)
     if(CNUMKIT_BUILD_CPP_SMOKE_TEST)
         enable_language(CXX)
         add_executable(test_cpp_headers tests/test_cpp_headers.cpp)
+        # Compile every header alone so include order cannot hide dependencies.
+        set(cnumkit_public_headers
+            cnumkit.h cnumkit_export.h
+            cnumkit/adapters.h cnumkit/contracts.h cnumkit/error.h
+            cnumkit/kernels.h cnumkit/linalg.h cnumkit/matrix.h
+            cnumkit/ml.h cnumkit/optim.h cnumkit/vector.h cnumkit/view.h
+        )
+        foreach(header_name IN LISTS cnumkit_public_headers)
+            string(MAKE_C_IDENTIFIER "${header_name}" probe_name)
+            set(probe_source "${CMAKE_CURRENT_BINARY_DIR}/cpp_headers/${probe_name}.cpp")
+            file(WRITE "${probe_source}" "#include <${header_name}>\n")
+            target_sources(test_cpp_headers PRIVATE "${probe_source}")
+        endforeach()
         target_link_libraries(test_cpp_headers PRIVATE cnumkit)
         target_compile_features(test_cpp_headers PRIVATE cxx_std_11)
         cnumkit_apply_project_options(test_cpp_headers)

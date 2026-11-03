@@ -119,6 +119,9 @@ The solver uses partial pivoting and a scale-relative small-pivot test. `CNK_ERR
 The optimization and ML modules are intentionally small teaching examples:
 
 - Numerical derivative uses a central difference and a caller-provided step.
+  The finite signed step must have magnitude at least `1e-12` and move both
+  sample points away from the evaluation point in floating-point arithmetic.
+  Overflowing sample points are rejected before calling the function.
 - Gradient descent uses a fixed internal derivative step and fixed learning rate.
 - Linear regression fits one input dimension with deterministic zero initialization.
 - MSE validates datasets, model parameters, accumulation, and output finiteness.

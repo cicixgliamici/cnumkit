@@ -20,6 +20,14 @@ First public release candidate of the scalar C11 library.
 - CI verification of consumers against extracted, relocated Linux and Windows
   archives, explicit C++ header checks, and release asset `SHA256SUMS` generation.
 
+### Fixed
+
+- C++ smoke coverage now compiles every public header in isolation and links
+  direct calls to the solver, optimization, vector access, and error APIs.
+- Central differences avoid spurious zero or math errors from overflowing
+  finite sample subtraction or `2*h`. Invalid sample points and steps that
+  round away are rejected without modifying caller outputs.
+
 ### Known limits
 
 - The API and ABI are pre-1.0. Compatibility is promised only within the

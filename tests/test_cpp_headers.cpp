@@ -1,4 +1,4 @@
-// Include individual headers before the umbrella to verify their own C linkage.
+// Omit the umbrella so direct declarations must supply their own C linkage.
 #include "cnumkit/view.h"
 #include "cnumkit/error.h"
 #include "cnumkit/vector.h"
@@ -8,9 +8,33 @@
 #include "cnumkit/linalg.h"
 #include "cnumkit/optim.h"
 #include "cnumkit/ml.h"
-#include "cnumkit.h"
+
+static double identity(double value) {
+    return value;
+}
+
+static bool test_direct_solver_and_derivative() {
+    double coefficient = 2.0;
+    double right_hand_side = 6.0;
+    cnk_matrix matrix = {1, 1, &coefficient};
+    cnk_vector vector = {1, &right_hand_side};
+    cnk_vector *solution = cnk_linalg_solve_gaussian(&matrix, &vector);
+    if (!solution) {
+        return false;
+    }
+    double value = 0.0;
+    double derivative = 0.0;
+    bool passed = cnk_vector_try_get(solution, 0, &value) == 0 && value == 3.0
+        && cnk_optim_numerical_derivative(identity, 0.0, 1.0, &derivative) == 0
+        && derivative == 1.0 && cnk_get_last_error() == CNK_SUCCESS;
+    cnk_vector_free(solution);
+    return passed;
+}
 
 int main() {
+    if (!test_direct_solver_and_derivative()) {
+        return 1;
+    }
     double values[] = {3.0, 4.0};
     cnk_vector owner = {2, values};
     cnk_f64_const_view view;

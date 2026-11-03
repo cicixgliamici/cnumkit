@@ -25,6 +25,75 @@ static double shifted_quadratic(double x) {
     return (x + 4.0) * (x + 4.0) + 7.0;
 }
 
+static double identity(double x) {
+    return x;
+}
+
+static double scaled_identity(double x) {
+    return x / DBL_MAX;
+}
+
+static double doubled_identity(double x) {
+    return 2.0 * x;
+}
+
+static double tiny_step_function(double x) {
+    /* A one-subnormal difference must survive until division by the step. */
+    return x > 0.0 ? DBL_TRUE_MIN : 0.0;
+}
+
+static int derivative_callback_calls = 0;
+
+static double counted_constant(double x) {
+    (void)x;
+    derivative_callback_calls++;
+    return 1.0;
+}
+
+static void test_derivative_extreme_finite_steps(void) {
+    double result = 11.0;
+
+    /* Both samples are finite, but forming 2*h would overflow to infinity. */
+    EXPECT_TRUE(cnk_optim_numerical_derivative(scaled_identity, 0.0,
+        DBL_MAX, &result) == 0);
+    EXPECT_TRUE(result > 0.0);
+    EXPECT_TRUE(fabs(result * DBL_MAX - 1.0) < 1e-12);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_SUCCESS);
+
+    /* The analytic slope is one even when subtracting samples overflows. */
+    EXPECT_TRUE(cnk_optim_numerical_derivative(identity, 0.0,
+        DBL_MAX, &result) == 0);
+    EXPECT_TRUE(result == 1.0);
+    EXPECT_TRUE(cnk_optim_numerical_derivative(doubled_identity, 0.0,
+        DBL_MAX / 2.0, &result) == 0);
+    EXPECT_TRUE(result == 2.0);
+    EXPECT_TRUE(cnk_optim_numerical_derivative(tiny_step_function, 0.0,
+        1e-12, &result) == 0);
+    EXPECT_TRUE(result > 0.0);
+    EXPECT_TRUE(cnk_optim_numerical_derivative(identity, 0.0,
+        -DBL_MAX, &result) == 0);
+    EXPECT_TRUE(result == 1.0);
+}
+
+static void test_derivative_invalid_sample_points(void) {
+    double result = 11.0;
+    derivative_callback_calls = 0;
+
+    /* Reject overflow before calling a function that could conceal it. */
+    EXPECT_TRUE(cnk_optim_numerical_derivative(counted_constant, DBL_MAX,
+        DBL_MAX, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_MATH);
+    EXPECT_TRUE(result == 11.0);
+    EXPECT_TRUE(derivative_callback_calls == 0);
+
+    /* A finite step can round away at a large point, producing a false zero. */
+    EXPECT_TRUE(cnk_optim_numerical_derivative(counted_constant, 1e20,
+        1.0, &result) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(result == 11.0);
+    EXPECT_TRUE(derivative_callback_calls == 0);
+}
+
 static void test_numerical_derivative(void) {
     /*
      * f(x) = (x - 3)^2
@@ -101,6 +170,11 @@ static void test_derivative_step_and_divergence(void) {
     EXPECT_ALMOST_EQ(result, 11.0);
 
     EXPECT_TRUE(cnk_optim_gradient_descent_1d(quadratic, 1e200, 1.0, 10, &result) == -1);
+    /* The fixed step is unrepresentable here, before any function evaluation. */
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_ALMOST_EQ(result, 11.0);
+
+    EXPECT_TRUE(cnk_optim_gradient_descent_1d(quadratic, 10.0, DBL_MAX, 10, &result) == -1);
     EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_MATH);
     EXPECT_ALMOST_EQ(result, 11.0);
 }
@@ -133,4 +207,6 @@ TEST_SUITE("Optimization and Solvers")
     RUN_TEST(test_derivative_step_and_divergence);
     RUN_TEST(test_derivative_at_negative_and_stationary_points);
     RUN_TEST(test_gradient_descent_on_shifted_minimum);
+    RUN_TEST(test_derivative_extreme_finite_steps);
+    RUN_TEST(test_derivative_invalid_sample_points);
 TEST_SUITE_END()

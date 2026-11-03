@@ -52,7 +52,21 @@ A small residual confirms that the computed solution satisfies the supplied syst
 
 ## Optimization And Regression
 
-The numerical derivative uses a central difference and rejects non-finite inputs, steps smaller than the documented internal floor, and non-finite function results. Gradient descent reports a math error when an intermediate iterate or derivative becomes non-finite.
+The numerical derivative uses a central difference with a finite signed step
+whose magnitude is at least `1e-12`. A step that rounds away at either sample
+point is invalid. Sample points are checked for overflow before callbacks run;
+non-finite points, function evaluations, and final results are math errors.
+All failures preserve the caller's output.
+
+The quotient avoids overflowing `2*h` or the difference of large finite
+samples by halving samples first only when necessary. For example,
+`f(x) = x / DBL_MAX` at zero with `h = DBL_MAX` has a positive representable
+slope; a direct overflowing denominator would incorrectly return zero.
+Ordinary differences are divided directly to retain subnormal differences.
+These arithmetic checks do not estimate truncation or cancellation error:
+callers must still select a step appropriate to their function and scale.
+Gradient descent uses the same checks and reports an error when its fixed step
+rounds away or an intermediate value becomes non-finite.
 
 Linear regression and MSE require finite datasets and model parameters. The implementation detects non-finite predictions, gradients, parameters, and accumulated errors. It intentionally remains a small educational example: it does not normalize features, adapt the learning rate, or provide a convergence report.
 

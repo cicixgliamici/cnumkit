@@ -37,6 +37,18 @@ The development strategy is deliberately scalar-first: establish a small, trustw
 
 ## Verified Baseline
 
+On 2026-11-03, the subsequent direct-header and derivative fix passed all 7
+CTest cases in strict GCC/G++ 13.3.0 Debug/shared and Release/static builds.
+The C++ target now compiles all 12 public headers in isolated translation units
+and calls the solver and derivative through direct module headers. Regression
+tests reproduced the old false-zero derivative before the fix; they now cover
+overflowing central-difference intermediates, subnormal differences, signed
+steps, and rejection of infinite or rounded-away sample points. All six C
+suites passed GCC ASan/leak detection and UBSan with 3,165 assertions total.
+The strict contracts-enabled static build also compiled, including the isolated
+C++ probes; negative contract tests were not executed. Doxygen 1.9.8 passed with
+warnings treated as errors. Remote Clang and Windows/MSVC results remain pending.
+
 On 2026-11-03, the documentation and packaging increment passed clean
 Ubuntu/WSL builds with GCC/G++ 13.3.0 and CMake 3.28.3, with warnings treated as
 errors. Debug/shared and Release/static each passed all 7 CTest cases. Both

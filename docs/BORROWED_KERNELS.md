@@ -101,9 +101,11 @@ and output buffers. The expected result is `[14.0, 32.0]`.
 The kernel suites exercise reversed/padded/transposed layouts, late numerical
 failures, empty products, metadata overflow, and norms from `1e-300` to `1e300`.
 Norm cases also compare against the platform `hypot` implementation. Optional
-`CNUMKIT_BUILD_CPP_SMOKE_TEST=ON` compiles and links individual headers directly
-from C++, without requiring a C++ compiler for ordinary C builds.
+`CNUMKIT_BUILD_CPP_SMOKE_TEST=ON` compiles each public header in a separate C++
+translation unit to check self-contained includes. The executable also calls
+the public modules through direct headers, without the umbrella, to check C
+linkage. Ordinary C builds do not require a C++ compiler.
 
 On Linux with GCC and sanitizer runtimes installed, `bash tests/run_sanitizers.sh`
-builds and runs the five C suites with ASan (including leak detection) and UBSan.
+builds and runs the six C suites with ASan (including leak detection) and UBSan.
 This path requires no CMake; artifacts stay in `build/linux-sanitized`.

@@ -25,12 +25,15 @@ typedef double (*cnk_scalar_function)(double x);
  * 
  * @param f The scalar function to differentiate.
  * @param x The point at which to evaluate the derivative.
- * @param h The step size (epsilon). Should be small (e.g., 1e-5) but not so small 
- *          as to cause floating-point cancellation errors.
+ * @param h A finite signed step with |h| >= 1e-12. Both x+h and x-h must
+ *          differ from x in floating-point arithmetic. A small step (e.g.,
+ *          1e-5) is typical, but its accuracy depends on the function and scale.
  * @param result Pointer to a double where the computed derivative will be stored.
  * @return 0 on success, or -1 on error.
- * @note result remains unchanged on failure. Function evaluations and the final
- *       derivative must be finite.
+ * @note result remains unchanged on failure. Non-finite inputs, a step below
+ *       the floor, or a step that rounds away set CNK_ERROR_INVALID_ARGUMENT.
+ *       Non-finite sample points, function evaluations, or the final derivative
+ *       set CNK_ERROR_MATH. Both signs of h are supported.
  */
 CNUMKIT_EXPORT int cnk_optim_numerical_derivative(
     cnk_scalar_function f,
@@ -52,6 +55,8 @@ CNUMKIT_EXPORT int cnk_optim_numerical_derivative(
  * @return 0 on success, or -1 on error.
  * @note result remains unchanged on failure. The learning rate must be positive,
  *       iterations must be positive, and all intermediate values must be finite.
+ *       The fixed derivative step of 1e-6 must move both sample points at each
+ *       iterate; otherwise the derivative reports CNK_ERROR_INVALID_ARGUMENT.
  */
 CNUMKIT_EXPORT int cnk_optim_gradient_descent_1d(
     cnk_scalar_function f,
