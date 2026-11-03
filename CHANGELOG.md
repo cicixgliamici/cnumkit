@@ -6,6 +6,10 @@ First public release candidate of the scalar C11 library.
 
 ### Added
 
+- A compact numerical-validation report with an exact source baseline, executed
+  test results, disclosed tolerances, observed thermal diagnostics, reproduction
+  commands, and pending evidence; included in offline and Doxygen documentation.
+
 - Principal thermal-network scientific case study with physical units, internal
   heat sources, boundary sensitivity, analytic references, algebraic residuals,
   and local/global energy conservation checks. A dedicated C suite and example

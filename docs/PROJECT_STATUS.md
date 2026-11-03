@@ -4,6 +4,10 @@ This document is the current, evidence-based snapshot of `cnumkit`. Dated
 baselines below preserve the public verification history; additional maintainer
 notes may exist in the ignored `local/LOCAL_CHANGELOG.md`.
 
+See [the numerical validation report](NUMERICAL_VALIDATION.md) for a compact,
+commit-specific summary of references, tolerances, measured thermal diagnostics,
+and reproduction commands for the latest numerical baseline.
+
 ## Project Goal
 
 `cnumkit` is an educational C11 scientific-computing library. Its purpose is to demonstrate readable API design, explicit memory ownership, recoverable error handling, numerical reasoning, testing, and portable builds. It is not intended to replace production libraries such as BLAS or LAPACK.

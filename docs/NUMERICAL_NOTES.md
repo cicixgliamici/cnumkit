@@ -2,6 +2,10 @@
 
 This document records the numerical assumptions behind the scalar reference implementation. The algorithms favor clarity and explicit failure over production-grade performance.
 
+The [numerical validation report](NUMERICAL_VALIDATION.md) records a dated source
+baseline, executed configurations, acceptance criteria, and measured thermal
+diagnostics. These notes explain the assumptions behind that evidence.
+
 ## Floating-Point Comparisons
 
 Tests use a combined absolute and relative comparison:

@@ -230,6 +230,7 @@ install(FILES LICENSE CHANGELOG.md
     docs/USER_GUIDE.md
     docs/BORROWED_KERNELS.md
     docs/NUMERICAL_NOTES.md
+    docs/NUMERICAL_VALIDATION.md
     docs/THERMAL_CASE_STUDY.md
     docs/PACKAGING.md
     docs/RELEASE_NOTES.md

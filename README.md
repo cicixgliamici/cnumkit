@@ -157,6 +157,7 @@ RISC-V support starts with cross-compilation and smoke tests against the scalar 
 ## Documentation
 
 - [Thermal case study](docs/THERMAL_CASE_STUDY.md): principal scientific walkthrough and reproducible results.
+- [Numerical validation report](docs/NUMERICAL_VALIDATION.md): dated baseline, reference checks, tolerances, and observed diagnostics.
 - [Packaging and release delivery](docs/PACKAGING.md): install trees, binary assets, and verification.
 - [Release checklist](docs/RELEASE_CHECKLIST.md): evidence required before tagging.
 - `docs/BORROWED_KERNELS.md`: zero-copy layouts, aliasing, kernel errors, and examples.
