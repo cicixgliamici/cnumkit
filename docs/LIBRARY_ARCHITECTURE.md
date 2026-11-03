@@ -94,13 +94,20 @@ CNK_REQUIRES(condition)
 CNK_ENSURES(condition)
 ```
 
-These checks are compiled in only when `CNUMKIT_ENABLE_CONTRACTS` is defined. They are meant for development and debugging. Public functions still perform runtime validation even when contracts are disabled.
+These internal invariant checks are active when `CNUMKIT_ENABLE_CONTRACTS=1`;
+undefined or zero disables condition evaluation. Enabled checks diagnose a
+false condition and abort regardless of `NDEBUG`. Public functions always
+perform recoverable runtime validation before reaching private helpers.
 
 This split matters:
 
 - API validation protects library users.
-- Contracts catch programmer mistakes early during development.
-- Release builds can avoid contract overhead without losing normal error handling.
+- Contracts catch internal implementation defects after public validation.
+- Builds can disable contracts without losing normal error handling; enabling
+  them in Release keeps the same fail-fast behavior as Debug.
+
+`docs/CONTRACTS.md` defines evaluation rules and how child-process death tests
+verify intentional aborts without confusing them with unrelated failures.
 
 ## Module Flow
 

@@ -81,7 +81,10 @@ ctest --test-dir build-strict -C Debug --output-on-failure
 
 GitHub Actions is configured to repeat strict Debug and Release builds with GCC, Clang, and MSVC. The matrix covers static and shared libraries, opt-in contracts, and a Clang sanitizer build.
 
-Contract-enabled builds are compiled separately because contracts intentionally abort on violated preconditions, while the current negative tests verify recoverable runtime error handling in-process. Dedicated contract death tests are planned before contract-enabled CTest execution is enabled.
+Public argument errors remain recoverable with contracts ON or OFF. Enabled
+contracts abort on internal invariant violations, including in Release with
+`NDEBUG`. The full suite runs in both modes; isolated death tests verify failed
+checks without terminating the test runner. See [contract semantics](docs/CONTRACTS.md).
 
 ## Installed CMake Package
 
@@ -158,6 +161,7 @@ RISC-V support starts with cross-compilation and smoke tests against the scalar 
 
 - [Thermal case study](docs/THERMAL_CASE_STUDY.md): principal scientific walkthrough and reproducible results.
 - [Numerical validation report](docs/NUMERICAL_VALIDATION.md): dated baseline, reference checks, tolerances, and observed diagnostics.
+- [Contract semantics](docs/CONTRACTS.md): recoverable public errors, internal checks, and isolated death tests.
 - [Packaging and release delivery](docs/PACKAGING.md): install trees, binary assets, and verification.
 - [Release checklist](docs/RELEASE_CHECKLIST.md): evidence required before tagging.
 - `docs/BORROWED_KERNELS.md`: zero-copy layouts, aliasing, kernel errors, and examples.

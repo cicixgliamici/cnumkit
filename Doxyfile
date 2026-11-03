@@ -13,6 +13,7 @@ INPUT                  = README.md \
                          docs/DEVELOPMENT_GUIDE.md \
                          docs/NUMERICAL_NOTES.md \
                          docs/NUMERICAL_VALIDATION.md \
+                         docs/CONTRACTS.md \
                          docs/BORROWED_KERNELS.md \
                          docs/PROJECT_STATUS.md \
                          docs/REVIEWER_ROADMAP.md \

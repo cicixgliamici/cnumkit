@@ -29,7 +29,9 @@ The development strategy is deliberately scalar-first: establish a small, trustw
 
 ## Established Guarantees
 
-- Public operations validate runtime inputs even when contracts are disabled.
+- Public argument errors remain recoverable with contracts enabled or disabled.
+  Optional contracts diagnose internal invariant violations and abort, including
+  in Release builds with `NDEBUG`; disabled checks never evaluate conditions.
 - Vector and matrix allocation checks reject zero sizes and `size_t` overflow.
 - Successful public operations clear the thread-local error state, except pure
   `_make` view constructors, which only assemble metadata and preserve that state.
@@ -40,6 +42,22 @@ The development strategy is deliberately scalar-first: establish a small, trustw
 - Scalar getters return `0.0` on failure; callers must inspect the error state when zero is ambiguous.
 
 ## Verified Baseline
+
+On 2026-11-03, the contract-semantics increment passed all 13 CTest cases in
+strict GCC/G++ 13.3.0 builds: contracts OFF in Debug/shared and Release/static,
+and contracts ON in Debug/static and Release/static. A fifth Debug/static build
+with contracts ON, ASan/leak detection, and UBSan also passed all 13 cases.
+These configurations enabled the C++ header smoke test. Four new standalone
+tests cover contracts zero/one and both `NDEBUG` states, single evaluation or
+no evaluation, precondition/postcondition aborts in child processes, and a
+deliberate ordinary-exit control. POSIX parents require `SIGABRT`; setup errors
+and unrelated signals are rejected. Public-error regressions include legacy
+getters, invalid indices, incompatible dimensions, and null solver inputs.
+The basic suite now passes 128 assertions, bringing the seven C suites to
+3,301 assertions; the four contract executables use separate exit-status checks.
+Doxygen 1.9.8 and installation of the contract guide passed. Linux/Windows
+Debug/Release contract jobs are configured as release prerequisites; their
+remote results and the native Windows death-test branch remain unverified.
 
 On 2026-11-03, the thermal-network increment made `THERMAL_CASE_STUDY.md` the
 principal scientific walkthrough. The example now assembles physical balances

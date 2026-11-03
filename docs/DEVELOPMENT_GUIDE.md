@@ -92,9 +92,16 @@ cmake -S . -B build-contracts \
   -DCNUMKIT_ENABLE_CONTRACTS=ON \
   -DCNUMKIT_WARNINGS_AS_ERRORS=ON
 cmake --build build-contracts --parallel
+ctest --test-dir build-contracts --output-on-failure
 ```
 
-Current negative tests run with contracts disabled because intentionally invalid calls would terminate the process. Add dedicated death tests before enabling CTest for contract-violation cases.
+Public negative tests must pass with contracts ON and OFF. Use contracts only
+for internal invariants after argument validation or successful construction;
+never use them to replace a documented recoverable public error. Checks must
+have no side effects and remain active under `NDEBUG` when explicitly enabled.
+Run `ctest --test-dir build-contracts -L contracts --output-on-failure` for the
+isolated macro/death tests. Repeat the full contract-enabled suite in Debug and
+Release; see `docs/CONTRACTS.md` for the test design.
 
 ## Definition Of Done
 
@@ -105,6 +112,6 @@ A change is ready for review when:
 - Success, boundary, and failure paths are tested.
 - Numerical tolerances and limits are explicit where relevant.
 - Debug/shared and Release/static CTest runs pass.
-- The contracts-enabled configuration compiles.
+- The contracts-enabled suite passes in Debug and Release, including death tests.
 - Public status and local history are current.
 - No generated build artifacts are added to version control.

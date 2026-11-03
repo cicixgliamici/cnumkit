@@ -34,13 +34,14 @@ Completed locally:
 - CTest registration and successful local execution of seven C suites, the
   optional C++ header smoke test, and the thermal case-study executable.
 - A contracts-enabled build.
+- Isolated precondition/postcondition death tests with both contract modes and
+  both `NDEBUG` states; recoverable public errors are tested in either mode.
 - A GitHub Actions matrix covering GCC, Clang, MSVC, static/shared linkage, contracts, and sanitizers.
 
 Remaining:
 
 - Run and confirm the GitHub Actions matrix remotely.
 - Add coverage reporting as supporting evidence, not as a substitute for meaningful numerical cases.
-- Add dedicated death tests before running negative tests with fail-fast contracts enabled.
 
 Completion criterion: all supported CI configurations pass from a clean checkout and the status document records the result.
 

@@ -21,6 +21,8 @@ static int pivot_is_too_small(double pivot_abs, double matrix_scale, size_t size
 }
 
 static void swap_rows(double *data, size_t cols, size_t row_a, size_t row_b) {
+    /* The validated augmented matrix must remain usable throughout elimination. */
+    CNK_REQUIRES(data != NULL && cols > 0);
     if (row_a == row_b) {
         return;
     }
@@ -33,10 +35,6 @@ static void swap_rows(double *data, size_t cols, size_t row_a, size_t row_b) {
 }
 
 cnk_vector *cnk_linalg_solve_gaussian(const cnk_matrix *A, const cnk_vector *b) {
-    CNK_REQUIRES(A != NULL && b != NULL);
-    CNK_REQUIRES(A->rows == A->cols);
-    CNK_REQUIRES(A->rows == b->size);
-
     if (!A || !b || !A->data || !b->data) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_linalg_solve_gaussian");
         return NULL;

@@ -49,13 +49,6 @@ jobs:
             contracts: OFF
             sanitizers: ON
             run_tests: true
-          - compiler: gcc
-            build_type: Debug
-            linkage: static-contracts-build
-            shared: OFF
-            contracts: ON
-            sanitizers: OFF
-            run_tests: false
     env:
       CC: ${{ matrix.compiler }}
       # Keep the C++ smoke test on the same sanitizer runtime as the C library.
@@ -164,10 +157,31 @@ jobs:
           path: cnumkit-windows-${{ matrix.linkage }}.zip
           if-no-files-found: error
 
+  contracts:
+    name: Contracts / ${{ matrix.os }} / ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        build_type: [Debug, Release]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Configure contract-enabled library
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=OFF -DCNUMKIT_ENABLE_CONTRACTS=ON -DCNUMKIT_WARNINGS_AS_ERRORS=ON -DCNUMKIT_BUILD_CPP_SMOKE_TEST=ON
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Test public errors and isolated contract deaths
+        run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
+
   release:
     name: Publish versioned release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [documentation, linux, windows]
+    needs: [documentation, linux, windows, contracts]
     runs-on: ubuntu-latest
     permissions:
       contents: write

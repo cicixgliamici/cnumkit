@@ -92,7 +92,8 @@ the candidate commit and CI links, and date the changelog. The version in
 `CMakeLists.txt`, `Doxyfile`, release notes, and the `vX.Y.Z` tag must agree.
 Creating or pushing a tag is a separate maintainer action.
 
-On a version tag, publication waits for documentation, Linux, and Windows jobs.
+On a version tag, publication waits for documentation, Linux, Windows, and the
+Debug/Release contract-enabled test jobs.
 The release job rejects a tag that differs from the CMake version, requires all
 four binary archives, generates and verifies `SHA256SUMS`, then publishes those
 five assets using `RELEASE_NOTES.md`. GitHub supplies source archives separately.

@@ -25,6 +25,8 @@ checkout is not a release merely because its CMake project version is `0.1.0`.
 - [x] Linux static and shared archives extracted at a new prefix and consumed
   with the original installation prefix unavailable.
 - [x] Linux ASan and UBSan run for all seven C suites, including the thermal model.
+- [x] Public-error semantics and isolated contract deaths verified locally with
+  contracts ON/OFF, both `NDEBUG` states, Debug/Release, and GCC sanitizers.
 - [ ] Complete remote GCC, Clang, and MSVC CI run on the candidate commit.
 - [ ] Installed Windows static and shared packages consumed by a separate project.
 - [x] Warning-free Doxygen generation with warnings treated as errors on Linux.

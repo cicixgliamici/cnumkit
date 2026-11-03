@@ -141,9 +141,15 @@ cmake -S . -B build-contracts \
   -DCMAKE_BUILD_TYPE=Debug \
   -DCNUMKIT_ENABLE_CONTRACTS=ON
 cmake --build build-contracts --parallel
+ctest --test-dir build-contracts --output-on-failure
 ```
 
-Contracts terminate the process when a programmer violates a precondition. They do not replace recoverable runtime validation. Current negative tests run with contracts disabled; dedicated death tests are required to validate intentional termination.
+Public argument errors remain recoverable in every configuration. Enabled
+contracts check internal invariants and abort on violations, independently of
+`NDEBUG`. The complete success/error suite runs with contracts enabled, while
+dedicated child processes test intentional termination. See
+[contract semantics and death tests](CONTRACTS.md) for the exact mode selection,
+condition evaluation rules, and platform-specific termination checks.
 
 ## Testing
 

@@ -420,6 +420,36 @@ static void test_non_finite_linear_system(void) {
     cnk_vector_free(rhs);
 }
 
+static void test_public_errors_with_optional_contracts(void) {
+    double storage[] = {4.0, 5.0};
+    cnk_vector vector = {1, storage};
+    cnk_vector longer_vector = {2, storage};
+    cnk_matrix matrix = {1, 1, storage};
+    double output = 17.0;
+
+    /* Legacy entry points must recover exactly like checked calls in both modes. */
+    EXPECT_TRUE(cnk_vector_get(NULL, 0) == 0.0);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(cnk_vector_get(&vector, 1) == 0.0);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(cnk_matrix_get(NULL, 0, 0) == 0.0);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(cnk_matrix_get(&matrix, 1, 0) == 0.0);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(cnk_matrix_set(&matrix, 0, 1, 9.0) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(storage[0] == 4.0 && storage[1] == 5.0);
+    EXPECT_NULL(cnk_matrix_identity(0));
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_TRUE(cnk_vector_dot(&vector, &longer_vector, &output) == -1);
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_DIMENSION_MISMATCH);
+    EXPECT_TRUE(output == 17.0);
+    EXPECT_NULL(cnk_matrix_multiply(NULL, &matrix));
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+    EXPECT_NULL(cnk_linalg_solve_gaussian(NULL, &vector));
+    EXPECT_TRUE(cnk_get_last_error() == CNK_ERROR_INVALID_ARGUMENT);
+}
+
 TEST_SUITE("Basic Operations and Error Handling")
     RUN_TEST(test_vector_dot);
     RUN_TEST(test_vector_norm2);
@@ -437,4 +467,5 @@ TEST_SUITE("Basic Operations and Error Handling")
     RUN_TEST(test_scale_invariant_gaussian_solve);
     RUN_TEST(test_one_by_one_and_pivoting_solve);
     RUN_TEST(test_non_finite_linear_system);
+    RUN_TEST(test_public_errors_with_optional_contracts);
 TEST_SUITE_END()

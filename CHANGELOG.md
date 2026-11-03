@@ -31,6 +31,12 @@ First public release candidate of the scalar C11 library.
 
 ### Fixed
 
+- Contract-enabled builds now preserve recoverable public argument errors.
+  Internal checks evaluate once and abort independently of `NDEBUG`; explicit
+  zero disables them. Isolated precondition/postcondition death tests cover
+  Debug/Release semantics, and CI runs complete contract-enabled suites on
+  Linux and Windows before release publication.
+
 - C++ smoke coverage now compiles every public header in isolation and links
   direct calls to the solver, optimization, vector access, and error APIs.
 - Central differences avoid spurious zero or math errors from overflowing

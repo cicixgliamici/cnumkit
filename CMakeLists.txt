@@ -77,7 +77,7 @@ target_include_directories(cnumkit BEFORE PUBLIC
 cnumkit_apply_project_options(cnumkit)
 
 if(CNUMKIT_ENABLE_CONTRACTS)
-    target_compile_definitions(cnumkit PUBLIC CNUMKIT_ENABLE_CONTRACTS)
+    target_compile_definitions(cnumkit PUBLIC CNUMKIT_ENABLE_CONTRACTS=1)
 endif()
 
 # Link the C math library where it exists as a separate library.
@@ -91,6 +91,25 @@ endif()
 option(CNUMKIT_BUILD_TESTS "Build tests" ON)
 option(CNUMKIT_BUILD_CPP_SMOKE_TEST "Verify individual public headers from C++" OFF)
 if(CNUMKIT_BUILD_TESTS AND BUILD_TESTING)
+    # Standalone header tests cover both contract modes independently of the library.
+    foreach(contract_mode IN ITEMS 0 1)
+        foreach(assertion_mode IN ITEMS debug ndebug)
+            set(contract_target test_contracts_${contract_mode}_${assertion_mode})
+            add_executable(${contract_target} tests/test_contracts.c)
+            target_include_directories(${contract_target} PRIVATE include)
+            target_compile_definitions(${contract_target} PRIVATE
+                CNUMKIT_ENABLE_CONTRACTS=${contract_mode})
+            if(assertion_mode STREQUAL "debug")
+                target_compile_definitions(${contract_target} PRIVATE CNUMKIT_TEST_WITHOUT_NDEBUG=1)
+            else()
+                target_compile_definitions(${contract_target} PRIVATE CNUMKIT_TEST_WITH_NDEBUG=1)
+            endif()
+            cnumkit_apply_project_options(${contract_target})
+            add_test(NAME ${contract_target} COMMAND ${contract_target})
+            set_tests_properties(${contract_target} PROPERTIES LABELS contracts TIMEOUT 20)
+        endforeach()
+    endforeach()
+
     add_executable(test_basic tests/test_basic.c)
     target_link_libraries(test_basic PRIVATE cnumkit)
     cnumkit_apply_project_options(test_basic)
@@ -231,6 +250,7 @@ install(FILES LICENSE CHANGELOG.md
     docs/BORROWED_KERNELS.md
     docs/NUMERICAL_NOTES.md
     docs/NUMERICAL_VALIDATION.md
+    docs/CONTRACTS.md
     docs/THERMAL_CASE_STUDY.md
     docs/PACKAGING.md
     docs/RELEASE_NOTES.md

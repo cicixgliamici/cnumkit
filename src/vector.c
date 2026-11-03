@@ -8,8 +8,6 @@
 #include "cnumkit/contracts.h"
 
 cnk_vector *cnk_vector_create(size_t size) {
-    CNK_REQUIRES(size > 0);
-
     /* Zero-length vectors are excluded so every created object has a usable data buffer. */
     if (size == 0) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Vector size must be greater than zero");
@@ -38,7 +36,7 @@ cnk_vector *cnk_vector_create(size_t size) {
 
     v->size = size;
 
-    CNK_ENSURES(v != NULL);
+    CNK_ENSURES(v->data != NULL);
     CNK_ENSURES(v->size == size);
 
     cnk_set_last_error(CNK_SUCCESS, NULL);
@@ -57,9 +55,6 @@ void cnk_vector_free(cnk_vector *v) {
 }
 
 double cnk_vector_get(const cnk_vector *v, size_t index) {
-    CNK_REQUIRES(v != NULL);
-    CNK_REQUIRES(index < v->size);
-
     double value = 0.0;
     return cnk_vector_try_get(v, index, &value) == 0 ? value : 0.0;
 }
@@ -94,10 +89,6 @@ int cnk_vector_set(cnk_vector *v, size_t index, double value) {
 }
 
 int cnk_vector_dot(const cnk_vector *a, const cnk_vector *b, double *result) {
-    CNK_REQUIRES(a != NULL && b != NULL);
-    CNK_REQUIRES(a->size == b->size);
-    CNK_REQUIRES(result != NULL);
-
     if (!a || !b || !result || !a->data || !b->data) {
         cnk_set_last_error(CNK_ERROR_INVALID_ARGUMENT, "Null pointer passed to cnk_vector_dot");
         return -1;
