@@ -5,6 +5,8 @@ This guide is the fastest way to regain context after time away from `cnumkit`. 
 ## Recommended Reading Order
 
 1. `README.md`: purpose, supported modules, and basic build commands.
+   Follow `docs/THERMAL_CASE_STUDY.md` for the principal end-to-end scientific
+   calculation, its analytic references, and its conservation checks.
 2. `docs/PROJECT_STATUS.md`: verified facts and current limitations.
 3. `docs/USER_GUIDE.md`: behavior visible to library users.
 4. `docs/LIBRARY_ARCHITECTURE.md`: internal data flow and module boundaries.

@@ -18,6 +18,26 @@ and publishes the GitHub Release only after all jobs succeed.
 - Scalar numerical optimization helpers.
 - Simple 1D machine-learning utilities.
 
+## Principal Scientific Case Study
+
+[The thermal network](docs/THERMAL_CASE_STUDY.md) follows a steady-state heat
+balance from physical assumptions and units to matrix assembly, Gaussian solve,
+and independently checked energy conservation. Three reproducible cases cover
+the original `[20, 10]` degree reference, unequal conductances with internal
+heating, and sensitivity to a warmer boundary. The program reports temperatures,
+heat rates, a normalized residual, and local/global energy imbalances.
+
+After building, run `./build/thermal_network` (or `build/Debug/thermal_network.exe`
+with Visual Studio). Run its analytic tests and executable through:
+
+```bash
+ctest --test-dir build -C Debug --output-on-failure -R thermal
+```
+
+Start with this case to see owned objects, borrowed kernels, error handling, and
+numerical validation work together. Inputs are synthetic and the model has two
+unknown temperatures; the guide explains the physical and numerical limits.
+
 ## Safety Model
 
 Public functions validate runtime inputs and report failures through return values plus thread-local error state:
@@ -118,17 +138,17 @@ int main(void) {
 
 ## Executable Use Cases
 
+- `thermal_network`: the principal scientific case study, with three steady-state
+  scenarios, analytic references, heat flows, and conservation diagnostics.
 - `sensor_calibration`: copies interleaved measurements through a borrowed view,
   applies baseline correction, transforms them with a matrix, and computes a norm.
   Expected output: corrected `[1, -1, 3]`, calibrated `[0, -4]`, magnitude `4`.
-- `thermal_network`: builds and solves a two-node steady-state heat balance.
-  Expected interior temperatures: `[20, 10]`.
 - `borrowed_matvec`, `solve_linear_system`, and `linear_regression_demo` cover
   direct matrix products, a general linear solve, and a fitted 1D model.
 
-The `test_math_scenarios` suite checks these mathematical compositions against
-independently calculated results alongside the focused kernel, solver,
-optimization, and ML tests.
+The `test_thermal` suite checks physical assembly against analytic temperatures
+and heat flows. `test_math_scenarios` covers the other mathematical compositions,
+alongside the focused kernel, solver, optimization, and ML tests.
 
 ## RISC-V Direction
 
@@ -136,6 +156,7 @@ RISC-V support starts with cross-compilation and smoke tests against the scalar 
 
 ## Documentation
 
+- [Thermal case study](docs/THERMAL_CASE_STUDY.md): principal scientific walkthrough and reproducible results.
 - [Packaging and release delivery](docs/PACKAGING.md): install trees, binary assets, and verification.
 - [Release checklist](docs/RELEASE_CHECKLIST.md): evidence required before tagging.
 - `docs/BORROWED_KERNELS.md`: zero-copy layouts, aliasing, kernel errors, and examples.

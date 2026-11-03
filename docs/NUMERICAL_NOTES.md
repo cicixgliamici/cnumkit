@@ -50,6 +50,12 @@ The normalized residual used by the tests is:
 
 A small residual confirms that the computed solution satisfies the supplied system. It does not prove that the solution is close to the exact solution when the matrix is ill-conditioned.
 
+The principal worked example is [the thermal case study](THERMAL_CASE_STUDY.md).
+It specifies the Frobenius matrix norm, compares temperatures and heat rates
+with analytic references, and supplements the algebraic residual with local and
+global energy balances. Its uniform rescaling tests preserve temperatures while
+scaling conductances, sources, and heat rates together.
+
 ## Optimization And Regression
 
 The numerical derivative uses a central difference with a finite signed step

@@ -107,5 +107,6 @@ the public modules through direct headers, without the umbrella, to check C
 linkage. Ordinary C builds do not require a C++ compiler.
 
 On Linux with GCC and sanitizer runtimes installed, `bash tests/run_sanitizers.sh`
-builds and runs the six C suites with ASan (including leak detection) and UBSan.
+builds and runs the seven C suites with ASan (including leak detection) and UBSan,
+including the thermal case study's application model.
 This path requires no CMake; artifacts stay in `build/linux-sanitized`.

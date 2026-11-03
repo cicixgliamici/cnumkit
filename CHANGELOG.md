@@ -6,6 +6,11 @@ First public release candidate of the scalar C11 library.
 
 ### Added
 
+- Principal thermal-network scientific case study with physical units, internal
+  heat sources, boundary sensitivity, analytic references, algebraic residuals,
+  and local/global energy conservation checks. A dedicated C suite and example
+  CTest exercise the shared application model without extending the library API.
+
 - Owned dense vectors and row-major matrices, Gaussian linear solve, scalar
   numerical optimization, and educational one-dimensional linear regression.
 - Borrowed strided `double` views, allocation-free scalar kernels, and adapters

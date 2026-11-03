@@ -104,6 +104,13 @@ This split matters:
 
 ## Module Flow
 
+The principal application walkthrough is `docs/THERMAL_CASE_STUDY.md`.
+`examples/thermal_model.c` assembles a two-node heat balance into owned matrix
+and vector objects, invokes the Gaussian solver, and uses borrowed views,
+matvec, AXPY, and norms to reconstruct the residual. Heat-flow balances then
+check physical conservation. The model is compiled into the example and its
+dedicated test executable, keeping application physics outside the library API.
+
 Vector operations are the lowest-level numeric building blocks. Matrix operations build on direct row-major indexing. Linear algebra routines use vectors and matrices as inputs and allocate result objects for the caller.
 
 For example, Gaussian solve works like this:

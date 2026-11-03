@@ -4,6 +4,10 @@
 
 This guide describes behavior visible to callers. Internal design is documented in `docs/LIBRARY_ARCHITECTURE.md`; floating-point decisions are documented in `docs/NUMERICAL_NOTES.md`.
 
+For a complete scientific application, start with
+[the thermal-network case study](THERMAL_CASE_STUDY.md), which connects these APIs
+to heat balances, analytic reference values, and conservation checks.
+
 ## Include And Link
 
 Include the umbrella header:

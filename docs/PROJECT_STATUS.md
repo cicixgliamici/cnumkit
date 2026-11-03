@@ -37,6 +37,23 @@ The development strategy is deliberately scalar-first: establish a small, trustw
 
 ## Verified Baseline
 
+On 2026-11-03, the thermal-network increment made `THERMAL_CASE_STUDY.md` the
+principal scientific walkthrough. The example now assembles physical balances
+with units, unequal conductances, internal sources, and a boundary sensitivity
+case; it reports heat rates, a normalized residual, and energy imbalances.
+The shared example/test model remains outside the library API. Strict GCC/G++
+13.3.0 Debug/shared and Release/static builds each passed 9 of 9 CTest cases,
+including the new thermal suite and executable. All seven C suites passed GCC
+ASan/leak detection and UBSan: 3,281 assertions, including 116 thermal checks.
+The thermal references include series resistances, exact heated solutions,
+reversed flow, equilibrium, power rescaling, and rejected invalid/ill-conditioned
+inputs. These are synthetic discrete-model checks, not experimental validation.
+The contracts-enabled static configuration compiled successfully. The thermal
+test passed with examples disabled, and the example built and ran with testing
+disabled. Installation included the offline case-study guide. Doxygen 1.9.8
+passed with warnings treated as errors. Remote Clang and Windows/MSVC checks
+remain pending; no new platform claims are made by this increment.
+
 On 2026-11-03, the subsequent direct-header and derivative fix passed all 7
 CTest cases in strict GCC/G++ 13.3.0 Debug/shared and Release/static builds.
 The C++ target now compiles all 12 public headers in isolated translation units

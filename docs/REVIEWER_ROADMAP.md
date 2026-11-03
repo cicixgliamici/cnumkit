@@ -4,8 +4,11 @@ This roadmap orders the remaining work by reviewer value. The goal is not to max
 
 ## Current Priority
 
-Finish the existing release-candidate documentation and packaging increment
-before expanding the scalar API. The `v0.1.0` candidate includes MIT licensing,
+Keep the release candidate scientifically reviewable before expanding the
+scalar API. The principal walkthrough is now `THERMAL_CASE_STUDY.md`: physical
+assumptions, units, assembly, analytic references, boundary sensitivity,
+residuals, and energy conservation around the `thermal_network` executable.
+The `v0.1.0` candidate includes MIT licensing,
 checked scalar access and prediction, a changelog, and a release checklist.
 Local GCC CMake, sanitizer, external-consumer, and warning-clean Doxygen checks
 have established the scalar baseline; see `PROJECT_STATUS.md` for dated evidence.
@@ -28,8 +31,8 @@ Status: **advanced partial**.
 Completed locally:
 
 - Strict Debug shared and Release static CMake builds.
-- CTest registration and successful local execution of six C suites and the
-  optional C++ header smoke test.
+- CTest registration and successful local execution of seven C suites, the
+  optional C++ header smoke test, and the thermal case-study executable.
 - A contracts-enabled build.
 - A GitHub Actions matrix covering GCC, Clang, MSVC, static/shared linkage, contracts, and sanitizers.
 
@@ -79,6 +82,9 @@ Status: **in progress**.
 - Doxygen generates locally with warnings treated as errors; the CI check is
   configured and awaits its first remote run.
 - Keep public claims tied to executed evidence.
+- Use the thermal case study as the primary path from physical equations to
+  numerical results; keep synthetic model checks distinct from validation
+  against experiments or a continuum model.
 - Include offline usage guidance in packages and document binary selection,
   checksums, and the release procedure in `PACKAGING.md`.
 

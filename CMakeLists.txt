@@ -122,6 +122,13 @@ if(CNUMKIT_BUILD_TESTS AND BUILD_TESTING)
     cnumkit_apply_project_options(test_math_scenarios)
     add_test(NAME test_math_scenarios COMMAND test_math_scenarios)
 
+    # Exercise the same physical assembly used by the principal example.
+    add_executable(test_thermal tests/test_thermal.c examples/thermal_model.c)
+    target_include_directories(test_thermal PRIVATE examples)
+    target_link_libraries(test_thermal PRIVATE cnumkit)
+    cnumkit_apply_project_options(test_thermal)
+    add_test(NAME test_thermal COMMAND test_thermal)
+
     # A C-only consumer should not need a C++ compiler to configure the library.
     if(CNUMKIT_BUILD_CPP_SMOKE_TEST)
         enable_language(CXX)
@@ -164,9 +171,12 @@ if(CNUMKIT_BUILD_EXAMPLES)
     target_link_libraries(sensor_calibration PRIVATE cnumkit)
     cnumkit_apply_project_options(sensor_calibration)
 
-    add_executable(thermal_network examples/thermal_network.c)
+    add_executable(thermal_network examples/thermal_network.c examples/thermal_model.c)
     target_link_libraries(thermal_network PRIVATE cnumkit)
     cnumkit_apply_project_options(thermal_network)
+    if(CNUMKIT_BUILD_TESTS AND BUILD_TESTING)
+        add_test(NAME thermal_network_case_study COMMAND thermal_network)
+    endif()
 endif()
 
 # -----------------
@@ -220,6 +230,7 @@ install(FILES LICENSE CHANGELOG.md
     docs/USER_GUIDE.md
     docs/BORROWED_KERNELS.md
     docs/NUMERICAL_NOTES.md
+    docs/THERMAL_CASE_STUDY.md
     docs/PACKAGING.md
     docs/RELEASE_NOTES.md
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/cnumkit

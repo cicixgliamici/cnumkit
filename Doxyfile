@@ -8,6 +8,7 @@ INPUT                  = README.md \
                          docs/USER_GUIDE.md \
                          docs/RELEASE_CHECKLIST.md \
                          docs/PACKAGING.md \
+                         docs/THERMAL_CASE_STUDY.md \
                          docs/LIBRARY_ARCHITECTURE.md \
                          docs/DEVELOPMENT_GUIDE.md \
                          docs/NUMERICAL_NOTES.md \

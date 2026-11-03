@@ -23,6 +23,9 @@ An installation contains public headers under `include/`, libraries under
 `lib/cmake/cnumkit/`, and offline documentation and the MIT license under
 `share/doc/cnumkit/`. Windows shared builds also install a DLL under `bin/`.
 The generated export header is installed in place of the source fallback.
+The offline documentation includes `THERMAL_CASE_STUDY.md`, the principal
+scientific walkthrough; its executable and test sources remain in the source
+distribution under `examples/` and `tests/`.
 
 ## Consume A Binary Archive
 

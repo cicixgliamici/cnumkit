@@ -8,7 +8,7 @@ test_build_dir="build/linux-sanitized"
 mkdir -p "$test_build_dir"
 test_compiler="${CC:-gcc}"
 test_flags=(-std=c11 -g -O1 -Wall -Wextra -Wpedantic -Werror
-    -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude)
+    -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude -Iexamples)
 test_objects=()
 
 "$test_compiler" --version
@@ -18,8 +18,13 @@ for source_file in src/*.c; do
     test_objects+=("$object_file")
 done
 
-for test_name in test_basic test_optim test_ml test_kernels test_matrix_kernels test_math_scenarios; do
-    "$test_compiler" "${test_flags[@]}" "tests/$test_name.c" "${test_objects[@]}" \
+for test_name in test_basic test_optim test_ml test_kernels test_matrix_kernels test_math_scenarios test_thermal; do
+    # The thermal model is example support code rather than a library module.
+    extra_sources=()
+    if [[ "$test_name" == test_thermal ]]; then
+        extra_sources=(examples/thermal_model.c)
+    fi
+    "$test_compiler" "${test_flags[@]}" "tests/$test_name.c" "${extra_sources[@]}" "${test_objects[@]}" \
         -lm -o "$test_build_dir/$test_name"
     # UBSan must fail the run, not merely print a diagnostic and return success.
     ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 \

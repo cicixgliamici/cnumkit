@@ -15,6 +15,8 @@ checkout is not a release merely because its CMake project version is `0.1.0`.
 - [x] Binary archive selection, checksum verification, CMake consumption, and
   Windows DLL setup documented in `PACKAGING.md`.
 - [x] Offline usage documentation included in installed packages.
+- [x] Principal thermal case study documents units, analytic references,
+  boundary sensitivity, numerical residuals, energy balances, and model limits.
 
 ## Verification
 
@@ -22,7 +24,7 @@ checkout is not a release merely because its CMake project version is `0.1.0`.
 - [x] Installed Linux static and shared packages used by a separate consumer.
 - [x] Linux static and shared archives extracted at a new prefix and consumed
   with the original installation prefix unavailable.
-- [x] Linux ASan and UBSan run for all six C suites.
+- [x] Linux ASan and UBSan run for all seven C suites, including the thermal model.
 - [ ] Complete remote GCC, Clang, and MSVC CI run on the candidate commit.
 - [ ] Installed Windows static and shared packages consumed by a separate project.
 - [x] Warning-free Doxygen generation with warnings treated as errors on Linux.
